@@ -308,16 +308,14 @@ export function Changelog({ releases }: Props) {
         ))}
       </div>
 
-      {/* Floating MorphPanel — morphs from pill to textarea on click */}
-      <div className="fixed bottom-0 left-0 right-0 flex justify-center z-30 pointer-events-none">
-        <div className="pointer-events-auto">
-          <MorphPanel
-            onSend={(message) => {
-              setPendingMessage(message)
-              setAiOpen(true)
-            }}
-          />
-        </div>
+      {/* Floating MorphPanel — bottom-right corner */}
+      <div className="fixed bottom-4 right-4 z-30">
+        <MorphPanel
+          onSend={(message) => {
+            setPendingMessage(message)
+            setAiOpen(true)
+          }}
+        />
       </div>
 
       <ChangelogAIPanel

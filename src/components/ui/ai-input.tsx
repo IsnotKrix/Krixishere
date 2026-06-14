@@ -180,11 +180,11 @@ export function MorphPanel({ onSend }: MorphPanelProps) {
   )
 
   return (
-    <div className="flex items-center justify-center" style={{ width: FORM_WIDTH, height: FORM_HEIGHT }}>
+    <div style={{ width: FORM_WIDTH, height: FORM_HEIGHT }}>
       <motion.div
         ref={wrapperRef}
         data-panel
-        className={cx("bg-background relative bottom-8 z-30 flex flex-col items-center overflow-hidden border max-sm:bottom-5")}
+        className={cx("bg-[#111111] border border-white/10 z-30 flex flex-col items-center overflow-hidden shadow-2xl shadow-black/60")}
         initial={false}
         animate={{
           width:        showForm ? FORM_WIDTH : "auto",
