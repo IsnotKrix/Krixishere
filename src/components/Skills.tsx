@@ -10,6 +10,12 @@ const skillGroups = [
       "Roblox Studio", "Lua",
     ],
   },
+   {
+    category: "Sigma Boy",
+    skills: [
+      "Skididi", "Shaur",
+    ],
+  },
 ];
 
 export default function Skills() {
