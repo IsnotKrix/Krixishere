@@ -1,5 +1,3 @@
-import Anthropic from "@anthropic-ai/sdk";
-
 const SYSTEM_PROMPT = `You are a helpful support assistant for krixishere.org, a dark minimalist portfolio website by Krix — a full-stack developer.
 
 You have full knowledge of the changelog:
@@ -28,38 +26,80 @@ Title: Portfolio Launch
 Answer questions about the site, its features, tech stack, or updates. Be concise, friendly, and helpful. If asked something unrelated, politely redirect to the changelog or site topics. Keep replies short — 1-3 sentences max unless the user asks for more detail.`;
 
 export async function POST(req: Request) {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  const apiKey = process.env.TOMDACAT_API_KEY;
+  if (!apiKey) {
     return new Response("AI support is not configured yet.", {
       headers: { "Content-Type": "text/plain; charset=utf-8" },
     });
   }
 
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-  const { messages } = await req.json() as {
+  const { messages } = (await req.json()) as {
     messages: Array<{ role: "user" | "assistant"; content: string }>;
   };
 
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${apiKey}`,
+  };
+  if (process.env.TOMDACAT_API_KEY_PASSWORD) {
+    headers["X-Api-Key-Password"] = process.env.TOMDACAT_API_KEY_PASSWORD;
+  }
+
   try {
-    const stream = await client.messages.stream({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 300,
-      system: SYSTEM_PROMPT,
-      messages,
+    const upstream = await fetch("https://ai.tomdacat.com/api/chat", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        stream: true,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          ...messages,
+        ],
+      }),
     });
 
+    if (!upstream.ok || !upstream.body) {
+      return new Response("Something went wrong. Please try again.", {
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
+    }
+
+    // Parse OpenAI-compatible SSE and forward only the text deltas
     const encoder = new TextEncoder();
+    const reader = upstream.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
     const readable = new ReadableStream({
       async start(controller) {
-        for await (const chunk of stream) {
-          if (
-            chunk.type === "content_block_delta" &&
-            chunk.delta.type === "text_delta"
-          ) {
-            controller.enqueue(encoder.encode(chunk.delta.text));
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+
+            const lines = buffer.split("\n");
+            buffer = lines.pop() ?? "";
+
+            for (const line of lines) {
+              if (!line.startsWith("data: ")) continue;
+              const data = line.slice(6).trim();
+              if (data === "[DONE]") continue;
+              try {
+                const json = JSON.parse(data) as {
+                  choices?: Array<{ delta?: { content?: string } }>;
+                };
+                const text = json.choices?.[0]?.delta?.content;
+                if (text) controller.enqueue(encoder.encode(text));
+              } catch {
+                // malformed SSE chunk — skip
+              }
+            }
           }
+        } finally {
+          controller.close();
         }
-        controller.close();
       },
     });
 
