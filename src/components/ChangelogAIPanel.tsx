@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useCallback } from "react"
+import React, { useState, useRef, useCallback, useEffect } from "react"
 import { X, Sparkles } from "lucide-react"
 import { AgentChat } from "@/components/agent-elements/agent-chat"
 import type { UIMessage, ChatStatus, SuggestionItem } from "@/components/agent-elements/agent-chat"
@@ -16,19 +16,22 @@ const SUGGESTIONS: SuggestionItem[] = [
 interface Props {
   open: boolean
   onClose: () => void
+  /** When set, this message is auto-sent as soon as the panel opens */
+  initialMessage?: string
 }
 
-export function ChangelogAIPanel({ open, onClose }: Props) {
-  const [messages, setMessages]   = useState<UIMessage[]>([])
-  const [status, setStatus]       = useState<ChatStatus>("ready")
-  const [error, setError]         = useState<Error | undefined>()
-  const abortRef                  = useRef<AbortController | null>(null)
+export function ChangelogAIPanel({ open, onClose, initialMessage }: Props) {
+  const [messages, setMessages] = useState<UIMessage[]>([])
+  const [status, setStatus]     = useState<ChatStatus>("ready")
+  const [error, setError]       = useState<Error | undefined>()
+  const abortRef                = useRef<AbortController | null>(null)
+  const sentInitialRef          = useRef<string>("")
 
-  const handleSend = useCallback(async (msg: { role: "user"; content: string }) => {
+  const sendMessage = useCallback((content: string) => {
     const userMsg: UIMessage = {
       id: crypto.randomUUID(),
       role: "user",
-      parts: [{ type: "text", text: msg.content }],
+      parts: [{ type: "text", text: content }],
       createdAt: new Date(),
     }
     const assistantId = crypto.randomUUID()
@@ -41,7 +44,6 @@ export function ChangelogAIPanel({ open, onClose }: Props) {
 
     setMessages((prev) => {
       const next = [...prev, userMsg, assistantMsg]
-
       const apiMessages = next
         .filter((m) => m.id !== assistantId)
         .map((m) => ({ role: m.role, content: m.parts[0].text }))
@@ -89,10 +91,34 @@ export function ChangelogAIPanel({ open, onClose }: Props) {
     })
   }, [])
 
+  const handleSend = useCallback(
+    (msg: { role: "user"; content: string }) => sendMessage(msg.content),
+    [sendMessage]
+  )
+
   const handleStop = useCallback(() => {
     abortRef.current?.abort()
     setStatus("ready")
   }, [])
+
+  // Auto-send the initial message once when the panel opens with a new message
+  useEffect(() => {
+    if (open && initialMessage && sentInitialRef.current !== initialMessage) {
+      sentInitialRef.current = initialMessage
+      setMessages([])
+      // Small delay so the panel slide-in animation plays first
+      const t = setTimeout(() => sendMessage(initialMessage), 200)
+      return () => clearTimeout(t)
+    }
+  }, [open, initialMessage, sendMessage])
+
+  // Reset when panel closes
+  useEffect(() => {
+    if (!open) {
+      abortRef.current?.abort()
+      sentInitialRef.current = ""
+    }
+  }, [open])
 
   return (
     <>
