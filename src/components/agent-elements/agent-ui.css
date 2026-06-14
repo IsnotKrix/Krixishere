@@ -1,0 +1,53 @@
+/* Agent Elements — CSS custom property tokens (dark theme for krixishere.org) */
+:root {
+  --an-foreground: #ededed;
+  --an-foreground-muted: #71717a;
+  --an-background: #0f0f0f;
+  --an-background-secondary: #1a1a1a;
+  --an-primary-color: #7c3aed;
+  --an-border-color: rgba(255, 255, 255, 0.08);
+  --an-tool-background: #1a1a1a;
+  --an-tool-border-radius: 10px;
+  --an-send-button-bg: #ededed;
+  --an-send-button-color: #0a0a0a;
+  --an-shimmer-duration: 2s;
+  --an-shimmer-spread: 100px;
+}
+
+/* Tailwind v4 bridge */
+@theme inline {
+  --color-an-foreground: var(--an-foreground);
+  --color-an-background: var(--an-background);
+  --color-an-primary: var(--an-primary-color);
+}
+
+/* TextShimmer animation */
+@keyframes an-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.an-text-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--an-foreground) 0%,
+    var(--an-foreground-muted) 40%,
+    var(--an-foreground) 60%,
+    var(--an-foreground-muted) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.an-text-shimmer--active {
+  animation: an-shimmer var(--an-shimmer-duration, 2s) linear infinite;
+}
+
+/* Loading dots */
+@keyframes loading-dots {
+  0%, 20%  { opacity: 0.2; transform: translateY(0); }
+  50%      { opacity: 1;   transform: translateY(-2px); }
+  80%, 100%{ opacity: 0.2; transform: translateY(0); }
+}
