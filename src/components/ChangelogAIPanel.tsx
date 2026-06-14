@@ -2,16 +2,11 @@
 
 import React, { useState, useRef, useCallback, useEffect } from "react"
 import { X, Sparkles } from "lucide-react"
+import { useSession } from "next-auth/react"
 import { AgentChat } from "@/components/agent-elements/agent-chat"
-import type { UIMessage, ChatStatus, SuggestionItem } from "@/components/agent-elements/agent-chat"
+import type { UIMessage, ChatStatus } from "@/components/agent-elements/agent-chat"
+import { AIAssistantCard } from "@/components/ui/ai-assistant-card"
 import { cn } from "@/lib/utils"
-
-const SUGGESTIONS: SuggestionItem[] = [
-  { id: "1", label: "What's new?",   value: "What's new in the latest update?" },
-  { id: "2", label: "Tech stack",    value: "What tech stack does this site use?" },
-  { id: "3", label: "All features",  value: "What are the main features of krixishere.org?" },
-  { id: "4", label: "Past releases", value: "Give me a summary of all releases so far." },
-]
 
 interface Props {
   open: boolean
@@ -21,6 +16,8 @@ interface Props {
 }
 
 export function ChangelogAIPanel({ open, onClose, initialMessage }: Props) {
+  const { data: session }       = useSession()
+  const userName                = session?.user?.name?.split(" ")[0] ?? "there"
   const [messages, setMessages] = useState<UIMessage[]>([])
   const [status, setStatus]     = useState<ChatStatus>("ready")
   const [error, setError]       = useState<Error | undefined>()
@@ -165,20 +162,24 @@ export function ChangelogAIPanel({ open, onClose, initialMessage }: Props) {
           </button>
         </div>
 
-        {/* Chat area */}
-        <div className="flex-1 min-h-0">
-          <AgentChat
-            messages={messages}
-            onSend={handleSend}
-            status={status}
-            onStop={handleStop}
-            error={error}
-            emptyStatePosition="center"
-            suggestions={{ items: SUGGESTIONS }}
-            emptySuggestionsPlacement="empty"
-            emptySuggestionsPosition="bottom"
-            className="h-full"
-          />
+        {/* Chat area — card on empty, chat when conversation started */}
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          {messages.length === 0 ? (
+            <AIAssistantCard
+              userName={userName}
+              onSend={(msg) => sendMessage(msg)}
+              onClose={onClose}
+            />
+          ) : (
+            <AgentChat
+              messages={messages}
+              onSend={handleSend}
+              status={status}
+              onStop={handleStop}
+              error={error}
+              className="h-full"
+            />
+          )}
         </div>
       </div>
     </>
