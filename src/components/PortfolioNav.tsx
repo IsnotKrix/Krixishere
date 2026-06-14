@@ -39,7 +39,7 @@ export function PortfolioNav() {
 
   const avatarSlot = session?.user ? (
     <>
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <button
             className="relative cursor-pointer px-1.5 py-1.5 rounded-full transition-colors hover:bg-white/5 focus:outline-none"
@@ -57,14 +57,14 @@ export function PortfolioNav() {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="cursor-pointer"
-            onSelect={() => { setProfileTab("Profile"); setProfileOpen(true); }}
+            onSelect={() => { setProfileTab("Profile"); setTimeout(() => setProfileOpen(true), 0); }}
           >
             <User className="h-4 w-4 mr-2" />
             Edit Profile
           </DropdownMenuItem>
           <DropdownMenuItem
             className="cursor-pointer"
-            onSelect={() => { setProfileTab("Passkeys"); setProfileOpen(true); }}
+            onSelect={() => { setProfileTab("Passkeys"); setTimeout(() => setProfileOpen(true), 0); }}
           >
             <Key className="h-4 w-4 mr-2" />
             Manage Passkeys
