@@ -30,6 +30,9 @@
 }
 
 :root {
+  --context-card-border: rgba(255, 255, 255, 0.10);
+  --ds-gray-1000: #ededed;
+  --ds-background-100: #111111;
   --background: #0a0a0a;
   --foreground: #ededed;
   --card: #111111;

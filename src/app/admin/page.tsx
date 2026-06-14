@@ -1,20 +1,40 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Plus, Pencil, Trash2, ArrowLeft, PackageOpen } from "lucide-react"
+import { Plus, Pencil, Trash2, ArrowLeft, PackageOpen, Users, BadgeCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ReleaseFormDialog } from "@/components/ReleaseFormDialog"
+import { ContextCard } from "@/components/ui/context-card"
 import type { DBRelease } from "@/lib/types"
 
+type AdminUser = {
+  discord_id: string
+  username: string
+  avatar_url: string | null
+  is_verified: boolean
+  verified_at: string | null
+  last_login: string | null
+}
+
+type Tab = "releases" | "users"
+
 export default function AdminPage() {
+  const [tab, setTab] = useState<Tab>("releases")
+
+  // Releases state
   const [releases, setReleases] = useState<DBRelease[]>([])
-  const [loading, setLoading] = useState(true)
+  const [releasesLoading, setReleasesLoading] = useState(true)
   const [formOpen, setFormOpen] = useState(false)
   const [editRelease, setEditRelease] = useState<DBRelease | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
 
+  // Users state
+  const [users, setUsers] = useState<AdminUser[]>([])
+  const [usersLoading, setUsersLoading] = useState(false)
+  const [verifying, setVerifying] = useState<string | null>(null)
+
   const fetchReleases = async () => {
-    setLoading(true)
+    setReleasesLoading(true)
     try {
       const res = await fetch("/api/releases")
       const data = await res.json()
@@ -22,11 +42,25 @@ export default function AdminPage() {
     } catch {
       setReleases([])
     } finally {
-      setLoading(false)
+      setReleasesLoading(false)
+    }
+  }
+
+  const fetchUsers = async () => {
+    setUsersLoading(true)
+    try {
+      const res = await fetch("/api/admin/users")
+      const data = await res.json()
+      setUsers(data)
+    } catch {
+      setUsers([])
+    } finally {
+      setUsersLoading(false)
     }
   }
 
   useEffect(() => { fetchReleases() }, [])
+  useEffect(() => { if (tab === "users") fetchUsers() }, [tab])
 
   const handleEdit = (release: DBRelease) => {
     setEditRelease(release)
@@ -59,6 +93,26 @@ export default function AdminPage() {
     fetchReleases()
   }
 
+  const handleVerify = async (discord_id: string, verify: boolean) => {
+    setVerifying(discord_id)
+    try {
+      await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ discord_id, verify }),
+      })
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.discord_id === discord_id
+            ? { ...u, is_verified: verify, verified_at: verify ? new Date().toISOString() : null }
+            : u
+        )
+      )
+    } finally {
+      setVerifying(null)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       {/* Top bar */}
@@ -73,94 +127,211 @@ export default function AdminPage() {
               <PackageOpen className="size-4 text-violet-400" />
               <span className="text-sm font-medium">Admin Panel</span>
             </div>
+            <div className="h-4 w-px bg-white/10" />
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setTab("releases")}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  tab === "releases"
+                    ? "bg-violet-500/15 text-violet-300 border border-violet-500/25"
+                    : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                <PackageOpen className="size-3.5" />
+                Releases
+              </button>
+              <button
+                onClick={() => setTab("users")}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  tab === "users"
+                    ? "bg-violet-500/15 text-violet-300 border border-violet-500/25"
+                    : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                <Users className="size-3.5" />
+                Users
+              </button>
+            </div>
           </div>
-          <Button
-            onClick={handleNew}
-            className="bg-violet-600 hover:bg-violet-500 text-white rounded-full text-sm gap-1.5"
-          >
-            <Plus className="size-4" />
-            New Release
-          </Button>
+          {tab === "releases" && (
+            <Button
+              onClick={handleNew}
+              className="bg-violet-600 hover:bg-violet-500 text-white rounded-full text-sm gap-1.5"
+            >
+              <Plus className="size-4" />
+              New Release
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Content */}
       <div className="max-w-5xl mx-auto px-6 py-10">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold">Releases</h1>
-          <p className="text-zinc-500 text-sm mt-1">
-            Manage changelog entries. Changes appear on{" "}
-            <a href="/changelog" className="text-violet-400 hover:underline">/changelog</a>{" "}
-            immediately.
-          </p>
-        </div>
+        {tab === "releases" && (
+          <>
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold">Releases</h1>
+              <p className="text-zinc-500 text-sm mt-1">
+                Manage changelog entries. Changes appear on{" "}
+                <a href="/changelog" className="text-violet-400 hover:underline">/changelog</a>{" "}
+                immediately.
+              </p>
+            </div>
 
-        {loading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 rounded-xl border border-white/[0.06] bg-white/[0.02] animate-pulse" />
-            ))}
-          </div>
-        ) : releases.length === 0 ? (
-          <div className="text-center py-20 text-zinc-600">
-            <PackageOpen className="size-10 mx-auto mb-3 opacity-40" />
-            <p className="text-sm">No releases yet. Create the first one.</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {releases.map((release) => (
-              <div
-                key={release.id}
-                className="group flex items-center gap-4 p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.10] transition-all"
-              >
-                <img
-                  src={release.image}
-                  alt={release.title}
-                  className="w-14 h-14 rounded-lg object-cover border border-white/10 shrink-0"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-semibold text-white truncate">{release.title}</span>
-                    <span className="px-2 py-0.5 text-[11px] rounded-full bg-violet-500/12 border border-violet-500/25 text-violet-300 shrink-0">
-                      {release.version}
-                    </span>
-                    {release.id.startsWith("static-") && (
-                      <span className="px-2 py-0.5 text-[11px] rounded-full bg-zinc-500/10 border border-zinc-500/20 text-zinc-500 shrink-0">
-                        static
-                      </span>
-                    )}
+            {releasesLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-20 rounded-xl border border-white/[0.06] bg-white/[0.02] animate-pulse" />
+                ))}
+              </div>
+            ) : releases.length === 0 ? (
+              <div className="text-center py-20 text-zinc-600">
+                <PackageOpen className="size-10 mx-auto mb-3 opacity-40" />
+                <p className="text-sm">No releases yet. Create the first one.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {releases.map((release) => (
+                  <div
+                    key={release.id}
+                    className="group flex items-center gap-4 p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.10] transition-all"
+                  >
+                    <img
+                      src={release.image}
+                      alt={release.title}
+                      className="w-14 h-14 rounded-lg object-cover border border-white/10 shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-semibold text-white truncate">{release.title}</span>
+                        <span className="px-2 py-0.5 text-[11px] rounded-full bg-violet-500/12 border border-violet-500/25 text-violet-300 shrink-0">
+                          {release.version}
+                        </span>
+                        {release.id.startsWith("static-") && (
+                          <span className="px-2 py-0.5 text-[11px] rounded-full bg-zinc-500/10 border border-zinc-500/20 text-zinc-500 shrink-0">
+                            static
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 mt-1">
+                        <time className="text-xs text-zinc-500">{release.date}</time>
+                        {release.tags?.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            {release.tags.slice(0, 3).map((t) => (
+                              <span key={t} className="text-[10px] text-zinc-600 bg-white/[0.04] px-1.5 py-0.5 rounded-full">{t}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost" size="icon"
+                        onClick={() => handleEdit(release)}
+                        className="text-zinc-500 hover:text-white size-8"
+                      >
+                        <Pencil className="size-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost" size="icon"
+                        onClick={() => handleDelete(release)}
+                        disabled={deleting === release.id}
+                        className="text-zinc-500 hover:text-red-400 size-8"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 mt-1">
-                    <time className="text-xs text-zinc-500">{release.date}</time>
-                    {release.tags?.length > 0 && (
-                      <div className="flex items-center gap-1">
-                        {release.tags.slice(0, 3).map((t) => (
-                          <span key={t} className="text-[10px] text-zinc-600 bg-white/[0.04] px-1.5 py-0.5 rounded-full">{t}</span>
-                        ))}
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {tab === "users" && (
+          <>
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold">Users</h1>
+              <p className="text-zinc-500 text-sm mt-1">
+                All users who have signed in via Discord. You can verify or unverify any account.
+              </p>
+            </div>
+
+            {usersLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-16 rounded-xl border border-white/[0.06] bg-white/[0.02] animate-pulse" />
+                ))}
+              </div>
+            ) : users.length === 0 ? (
+              <div className="text-center py-20 text-zinc-600">
+                <Users className="size-10 mx-auto mb-3 opacity-40" />
+                <p className="text-sm">No users have signed in yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {users.map((user) => (
+                  <div
+                    key={user.discord_id}
+                    className="flex items-center gap-4 p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.10] transition-all"
+                  >
+                    {user.avatar_url ? (
+                      <img
+                        src={user.avatar_url}
+                        alt={user.username}
+                        className="w-10 h-10 rounded-full object-cover border border-white/10 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-violet-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                        {user.username?.[0]?.toUpperCase() ?? "?"}
                       </div>
                     )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-semibold text-white truncate">{user.username}</span>
+                        {user.is_verified && (
+                          <ContextCard.Trigger
+                            content={
+                              <span className="flex items-center gap-1">
+                                <BadgeCheck className="size-3 text-violet-400" />
+                                Verified user
+                              </span>
+                            }
+                            side="top"
+                          >
+                            <BadgeCheck className="size-4 text-violet-400 shrink-0" />
+                          </ContextCard.Trigger>
+                        )}
+                      </div>
+                      <p className="text-xs text-zinc-600 mt-0.5">
+                        Last login:{" "}
+                        {user.last_login
+                          ? new Date(user.last_login).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+                          : "never"}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={verifying === user.discord_id}
+                      onClick={() => handleVerify(user.discord_id, !user.is_verified)}
+                      className={
+                        user.is_verified
+                          ? "text-zinc-400 hover:text-red-400 hover:bg-red-400/10 text-xs"
+                          : "text-violet-400 hover:text-violet-300 hover:bg-violet-400/10 text-xs"
+                      }
+                    >
+                      {verifying === user.discord_id
+                        ? "..."
+                        : user.is_verified
+                        ? "Unverify"
+                        : "Verify"}
+                    </Button>
                   </div>
-                </div>
-                <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    variant="ghost" size="icon"
-                    onClick={() => handleEdit(release)}
-                    className="text-zinc-500 hover:text-white size-8"
-                  >
-                    <Pencil className="size-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost" size="icon"
-                    onClick={() => handleDelete(release)}
-                    disabled={deleting === release.id}
-                    className="text-zinc-500 hover:text-red-400 size-8"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </Button>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
 
