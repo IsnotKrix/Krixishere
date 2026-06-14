@@ -46,7 +46,7 @@ export default function Hero() {
           {...fadeUp(0.35)}
           className="text-zinc-400 text-lg md:text-xl max-w-xl leading-relaxed mb-10"
         >
-          I'm already here <span className="text-white font-medium">3+ years</span>, In roblox programmer and I will create a website
+          Roblox developer with <span className="text-white font-medium">3+ years</span> of experience, now expanding into web development with Next.js and modern tools.
         </motion.p>
 
         <motion.div {...fadeUp(0.5)} className="flex flex-wrap justify-center items-center gap-4 mb-16 pointer-events-auto">
