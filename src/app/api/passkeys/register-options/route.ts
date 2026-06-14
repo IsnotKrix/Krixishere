@@ -28,6 +28,7 @@ export async function POST() {
   const options = await generateRegistrationOptions({
     rpName: RP_NAME,
     rpID: RP_ID,
+    userID: session.user.discordId,
     userName: session.user.discordId,
     userDisplayName: session.user.name ?? "Krix",
     attestationType: "none",
