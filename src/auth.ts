@@ -12,7 +12,11 @@ declare module "next-auth" {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [Discord],
+  providers: [
+    Discord({
+      authorization: "https://discord.com/api/oauth2/authorize?scope=identify",
+    }),
+  ],
   callbacks: {
     jwt({ token, account, profile }) {
       if (account?.provider === "discord" && profile) {

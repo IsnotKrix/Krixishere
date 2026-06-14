@@ -45,21 +45,52 @@ const STEP_LABELS = ["Basic info", "Content", "Meta & author"]
 
 function StepIndicator({ step }: { step: number }) {
   return (
-    <div className="flex items-center gap-6 relative">
-      {[1, 2, 3].map((dot) => (
-        <div
-          key={dot}
-          className={cn(
-            "w-2 h-2 rounded-full relative z-10 transition-colors duration-300",
-            dot <= step ? "bg-white" : "bg-zinc-700"
-          )}
-        />
-      ))}
-      <motion.div
-        className="absolute -left-[8px] -top-[4px] h-3 bg-violet-500 rounded-full"
-        animate={{ width: step === 1 ? "24px" : step === 2 ? "60px" : "96px" }}
-        transition={{ type: "spring", stiffness: 300, damping: 20, mass: 0.8 }}
-      />
+    <div className="flex items-center gap-0">
+      {STEP_LABELS.map((label, idx) => {
+        const n = idx + 1
+        const done = n < step
+        const active = n === step
+        return (
+          <div key={n} className="flex items-center">
+            <div className="flex flex-col items-center gap-1">
+              <motion.div
+                animate={{
+                  backgroundColor: active ? "#7c3aed" : done ? "#5b21b6" : "rgba(255,255,255,0.06)",
+                  borderColor: active ? "#7c3aed" : done ? "#5b21b6" : "rgba(255,255,255,0.10)",
+                }}
+                transition={{ duration: 0.25 }}
+                className="w-7 h-7 rounded-full border flex items-center justify-center text-xs font-semibold shrink-0"
+              >
+                {done ? (
+                  <motion.svg
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="w-3.5 h-3.5 text-white"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                  >
+                    <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </motion.svg>
+                ) : (
+                  <span className={active ? "text-white" : "text-zinc-600"}>{n}</span>
+                )}
+              </motion.div>
+              <span className={cn("text-[10px] font-medium whitespace-nowrap", active ? "text-zinc-300" : done ? "text-zinc-500" : "text-zinc-600")}>
+                {label}
+              </span>
+            </div>
+            {n < 3 && (
+              <div className="relative w-10 h-px mx-1 mb-4 bg-white/[0.08]">
+                <motion.div
+                  className="absolute inset-y-0 left-0 bg-violet-600"
+                  animate={{ width: done ? "100%" : "0%" }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -262,9 +293,8 @@ export function ReleaseFormDialog({ open, onClose, onSave, release }: Props) {
                 : "New Release"}
             </DialogTitle>
           </DialogHeader>
-          <div className="mt-4 flex items-center gap-4">
+          <div className="mt-4">
             <StepIndicator step={step} />
-            <span className="text-xs text-zinc-500">{STEP_LABELS[step - 1]}</span>
           </div>
         </div>
 
