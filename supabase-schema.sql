@@ -1,4 +1,15 @@
--- Run this in your Supabase SQL editor to set up passkeys + profiles
+-- Run this in your Supabase SQL editor to set up passkeys + profiles + user registry
+
+CREATE TABLE IF NOT EXISTS user_registry (
+  discord_id  TEXT PRIMARY KEY,
+  username    TEXT NOT NULL,
+  avatar_url  TEXT,
+  is_verified BOOLEAN NOT NULL DEFAULT FALSE,
+  verified_at TIMESTAMPTZ,
+  last_login  TIMESTAMPTZ
+);
+
+ALTER TABLE user_registry DISABLE ROW LEVEL SECURITY;
 
 CREATE TABLE IF NOT EXISTS profiles (
   user_id      TEXT PRIMARY KEY,
