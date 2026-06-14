@@ -35,7 +35,7 @@ function UserAvatar({ src, name }: { src?: string | null; name?: string | null }
 export function PortfolioNav() {
   const { data: session } = useSession();
   const [profileOpen, setProfileOpen] = useState(false);
-  const [profileTab, setProfileTab] = useState<"Profile" | "Passkeys">("Profile");
+  const [profileTab, setProfileTab] = useState<"Profile" | "Security">("Profile");
 
   const avatarSlot = session?.user ? (
     <>
@@ -64,7 +64,7 @@ export function PortfolioNav() {
           </DropdownMenuItem>
           <DropdownMenuItem
             className="cursor-pointer"
-            onSelect={() => { setProfileTab("Passkeys"); setTimeout(() => setProfileOpen(true), 0); }}
+            onSelect={() => { setProfileTab("Security"); setTimeout(() => setProfileOpen(true), 0); }}
           >
             <Key className="h-4 w-4 mr-2" />
             Manage Passkeys

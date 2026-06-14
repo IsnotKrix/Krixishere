@@ -340,7 +340,7 @@ function detectDeviceName(): string {
 
 // ─── Main dialog ──────────────────────────────────────────────────────────────
 
-const TABS = ["Profile", "Passkeys"] as const;
+const TABS = ["Profile", "Security"] as const;
 type Tab = (typeof TABS)[number];
 
 export function EditProfileDialog({
@@ -396,6 +396,7 @@ export function EditProfileDialog({
           ) : (
             <PasskeysTab />
           )}
+          {/* note: "Security" tab renders PasskeysTab */}
         </div>
       </DialogContent>
     </Dialog>
