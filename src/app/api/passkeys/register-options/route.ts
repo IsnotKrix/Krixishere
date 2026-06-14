@@ -21,7 +21,7 @@ export async function POST() {
     .eq("user_id", session.user.discordId)
 
   const excludeCredentials = (existing ?? []).map((pk: { credential_id: string }) => ({
-    id: pk.credential_id,
+    id: Buffer.from(pk.credential_id, "base64url"),
     type: "public-key" as const,
   }))
 
