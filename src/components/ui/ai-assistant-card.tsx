@@ -23,9 +23,7 @@ const SUGGESTIONS = [
 ]
 
 const MODELS = [
-  { id: "sonnet",         name: "Claude",  version: "Sonnet 4.6" },
-  { id: "haiku",         name: "Claude",  version: "Haiku 4.5" },
-  { id: "gpt-5-mini",    name: "GPT",     version: "5 mini" },
+  { id: "gpt-5-mini",     name: "GPT",    version: "5 mini" },
   { id: "gemini-3-flash", name: "Gemini", version: "3 Flash" },
 ]
 
@@ -92,7 +90,7 @@ export function AIAssistantCard({ onSend, userName = "there", model, onModelChan
             <ModelPicker
               models={MODELS}
               value={model}
-              defaultValue="sonnet"
+              defaultValue="gpt-5-mini"
               onChange={onModelChange}
             />
           }

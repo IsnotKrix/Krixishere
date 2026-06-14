@@ -12,10 +12,8 @@ import { IconInfinity } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 
 const MODELS = [
-  { id: "sonnet",          name: "Claude",  version: "Sonnet 4.6" },
-  { id: "haiku",           name: "Claude",  version: "Haiku 4.5" },
-  { id: "gpt-5-mini",      name: "GPT",     version: "5 mini" },
-  { id: "gemini-3-flash",  name: "Gemini",  version: "3 Flash" },
+  { id: "gpt-5-mini",     name: "GPT",    version: "5 mini" },
+  { id: "gemini-3-flash", name: "Gemini", version: "3 Flash" },
 ]
 
 interface Props {
@@ -31,7 +29,7 @@ export function ChangelogAIPanel({ open, onClose, initialMessage }: Props) {
   const [messages, setMessages] = useState<UIMessage[]>([])
   const [status, setStatus]     = useState<ChatStatus>("ready")
   const [error, setError]       = useState<Error | undefined>()
-  const [model, setModel]       = useState("sonnet")
+  const [model, setModel]       = useState("gpt-5-mini")
   const abortRef                = useRef<AbortController | null>(null)
   const sentInitialRef          = useRef<string>("")
 
