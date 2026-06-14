@@ -1,4 +1,6 @@
 -- Run this in your Supabase SQL editor to set up passkeys + profiles + user registry
+-- API routes use SUPABASE_SERVICE_ROLE_KEY which bypasses RLS server-side.
+-- RLS is enabled as a safety net so the anon key (public) can't read/write anything.
 
 CREATE TABLE IF NOT EXISTS user_registry (
   discord_id  TEXT PRIMARY KEY,
@@ -8,8 +10,6 @@ CREATE TABLE IF NOT EXISTS user_registry (
   verified_at TIMESTAMPTZ,
   last_login  TIMESTAMPTZ
 );
-
-ALTER TABLE user_registry DISABLE ROW LEVEL SECURITY;
 
 CREATE TABLE IF NOT EXISTS profiles (
   user_id      TEXT PRIMARY KEY,
@@ -35,15 +35,11 @@ CREATE TABLE IF NOT EXISTS passkey_challenges (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- RLS: only the owner can read/write their own rows
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE passkeys ENABLE ROW LEVEL SECURITY;
+-- Enable RLS on all tables (anon key has zero access; service role bypasses RLS)
+ALTER TABLE user_registry     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profiles           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE passkeys           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE passkey_challenges ENABLE ROW LEVEL SECURITY;
 
--- Note: these policies use service_role which bypasses RLS.
--- Since the API routes use the anon key, you may need to add
--- permissive policies or switch to a service role key.
--- For a personal site, the simplest option is to disable RLS:
--- ALTER TABLE profiles DISABLE ROW LEVEL SECURITY;
--- ALTER TABLE passkeys DISABLE ROW LEVEL SECURITY;
--- ALTER TABLE passkey_challenges DISABLE ROW LEVEL SECURITY;
+-- No RLS policies needed: the service role key used by API routes bypasses RLS,
+-- and the public anon key is intentionally blocked by the absence of policies.
