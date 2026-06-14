@@ -19,6 +19,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       authorization: "https://discord.com/api/oauth2/authorize?scope=identify",
     }),
   ],
+  events: {
+    async signIn({ user, profile }) {
+      if (!profile) return
+      const discordProfile = profile as { id: string; global_name?: string; username?: string; avatar?: string }
+      try {
+        const supabase = getSupabase()
+        await supabase.from("user_registry").upsert({
+          discord_id: discordProfile.id,
+          username: discordProfile.global_name ?? discordProfile.username ?? user.name ?? "Unknown",
+          avatar_url: user.image ?? null,
+          last_login: new Date().toISOString(),
+        }, { onConflict: "discord_id", ignoreDuplicates: false })
+      } catch { /* non-critical */ }
+    },
+  },
   callbacks: {
     async jwt({ token, account, profile }) {
       if (account?.provider === "discord" && profile) {
@@ -26,7 +41,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.discordId = discordId
         token.isAdmin = isAdmin(discordId)
 
-        // Check if user has any passkeys registered (only on sign-in)
         try {
           const supabase = getSupabase()
           const { data } = await supabase
@@ -46,7 +60,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.discordId = token.discordId as string | undefined
         session.user.isAdmin = token.isAdmin as boolean | undefined
         session.user.hasPasskey = token.hasPasskey as boolean | undefined
-        // Strip email — we don't collect or expose personal info
         session.user.email = undefined as never
       }
       return session

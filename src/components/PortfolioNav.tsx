@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { NavBar } from "@/components/ui/tubelight-navbar";
-import { Home, ScrollText, User, Key, LogOut } from "lucide-react";
+import { Home, ScrollText, User, Key, LogOut, Shield } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import {
   DropdownMenu,
@@ -69,6 +69,18 @@ export function PortfolioNav() {
             <Key className="h-4 w-4 mr-2" />
             Manage Passkeys
           </DropdownMenuItem>
+          {session.user.isAdmin && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={() => { window.location.href = "/admin" }}
+              >
+                <Shield className="h-4 w-4 mr-2 text-violet-400" />
+                Admin Panel
+              </DropdownMenuItem>
+            </>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
