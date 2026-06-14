@@ -180,7 +180,7 @@ export function MorphPanel({ onSend }: MorphPanelProps) {
   )
 
   return (
-    <div style={{ width: FORM_WIDTH, height: FORM_HEIGHT }}>
+    <div>
       <motion.div
         ref={wrapperRef}
         data-panel
