@@ -36,12 +36,13 @@ export default function About() {
             </h2>
             <div className="space-y-4 text-zinc-400 leading-relaxed">
               <p>
-                I build web applications that are fast, reliable, and actually enjoyable to use.
-                I focus on clean code and thoughtful UX — because great software should feel effortless.
+                I&apos;ve been developing games and experiences in Roblox Studio for 3+ years,
+                writing Lua scripts that bring ideas to life — from gameplay systems to full game worlds.
               </p>
               <p>
-                When I&apos;m not coding, I&apos;m exploring new technologies, contributing to open source,
-                or thinking about how systems can be better designed.
+                Now I&apos;m expanding into web development, building this portfolio with Next.js,
+                TypeScript, and Tailwind CSS. I care about clean, readable code whether it&apos;s
+                Lua or TypeScript — if I&apos;m building something, it should work well and feel good to use.
               </p>
             </div>
             <div className="mt-8">
