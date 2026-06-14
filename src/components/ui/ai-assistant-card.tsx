@@ -23,8 +23,8 @@ const SUGGESTIONS = [
 ]
 
 const MODELS = [
-  { id: "haiku",  name: "Claude", version: "Haiku" },
-  { id: "sonnet", name: "Claude", version: "Sonnet" },
+  { id: "haiku",  name: "Claude", version: "Haiku 4.5" },
+  { id: "sonnet", name: "Claude", version: "Sonnet 4.6" },
 ]
 
 interface Props {

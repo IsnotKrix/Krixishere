@@ -3,6 +3,7 @@
 import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus, X, ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { IconInfinity } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { SendButton } from "./input/send-button";
 import { ModelPicker } from "./input/model-picker";
@@ -384,12 +385,15 @@ export function InputBar({
             {leftActions ?? (
               <>
                 <ModeSelector
-                  modes={[{ id: "agent", label: "Agent" }]}
+                  modes={[{ id: "agent", label: "Agent", icon: IconInfinity }]}
                   defaultValue="agent"
                 />
                 <ModelPicker
-                  models={[{ id: "haiku", name: "Claude", version: "Haiku" }]}
-                  defaultValue="haiku"
+                  models={[
+                    { id: "sonnet", name: "Claude", version: "Sonnet 4.6" },
+                    { id: "haiku",  name: "Claude", version: "Haiku 4.5" },
+                  ]}
+                  defaultValue="sonnet"
                 />
               </>
             )}
