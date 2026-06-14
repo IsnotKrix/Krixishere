@@ -30,6 +30,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.discordId = token.discordId as string | undefined
         session.user.isAdmin = token.isAdmin as boolean | undefined
+        // Strip email — we don't collect or expose personal info
+        session.user.email = undefined as never
       }
       return session
     },

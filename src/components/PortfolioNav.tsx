@@ -53,9 +53,6 @@ export function PortfolioNav() {
             <span className="font-semibold text-sm text-foreground">
               {session.user.name}
             </span>
-            <span className="text-xs text-muted-foreground font-normal truncate">
-              {session.user.email}
-            </span>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem
