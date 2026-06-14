@@ -1,11 +1,14 @@
 import { auth } from "@/auth"
+import { tfaToken } from "@/lib/tfa"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-// Paths that never require 2FA
+// Only skip paths strictly required to perform the 2FA flow itself
 const SKIP_PATHS = [
   "/verify",
-  "/api/",
+  "/api/auth/",               // NextAuth session/callback endpoints
+  "/api/passkeys/auth-options", // needed to begin 2FA
+  "/api/passkeys/auth-verify",  // needed to complete 2FA
   "/consent",
   "/privacy",
   "/terms",
@@ -23,10 +26,11 @@ export async function proxy(request: NextRequest) {
 
   const session = await auth()
 
-  // If the user is logged in and has a passkey, enforce 2FA
-  if (session?.user?.hasPasskey) {
+  if (session?.user?.hasPasskey && session.user.discordId) {
     const tfaCookie = request.cookies.get("x-tfa")
-    if (!tfaCookie?.value) {
+    const expected = tfaToken(session.user.discordId)
+
+    if (tfaCookie?.value !== expected) {
       const verifyUrl = new URL("/verify", request.url)
       verifyUrl.searchParams.set("from", pathname)
       return NextResponse.redirect(verifyUrl)

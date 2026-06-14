@@ -30,9 +30,11 @@ export default function VerifyPage() {
       });
       if (!verRes.ok) throw new Error((await verRes.json()).error);
 
-      // Redirect to home (or wherever the user was going)
+      // Redirect to home (or wherever the user was going — relative paths only)
       const params = new URLSearchParams(window.location.search);
-      router.push(params.get("from") ?? "/");
+      const raw = params.get("from") ?? "/";
+      const to = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
+      router.push(to);
       router.refresh();
     } catch (e) {
       const msg = (e as Error).message;

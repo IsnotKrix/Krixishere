@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { getSupabase } from "@/lib/supabase"
+import { tfaToken } from "@/lib/tfa"
 import { verifyAuthenticationResponse } from "@simplewebauthn/server"
 
 const RP_ID = process.env.NODE_ENV === "production" ? "krixishere.org" : "localhost"
@@ -78,9 +79,9 @@ export async function POST(req: Request) {
   // Clean up challenge
   await supabase.from("passkey_challenges").delete().eq("user_id", session.user.discordId)
 
-  // Set 2FA verified cookie
+  // Set 2FA verified cookie — HMAC-signed with discordId so it's account-bound
   const res = NextResponse.json({ success: true })
-  res.cookies.set("x-tfa", "1", {
+  res.cookies.set("x-tfa", tfaToken(session.user.discordId!), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
