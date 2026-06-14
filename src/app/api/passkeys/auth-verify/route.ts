@@ -56,9 +56,9 @@ export async function POST(req: Request) {
       expectedChallenge: challengeRow.challenge,
       expectedOrigin: ORIGIN,
       expectedRPID: RP_ID,
-      authenticator: {
-        credentialID: Buffer.from(passkey.credential_id, "base64url"),
-        credentialPublicKey: Buffer.from(passkey.public_key, "base64url"),
+      credential: {
+        id: passkey.credential_id,
+        publicKey: Buffer.from(passkey.public_key, "base64url"),
         counter: passkey.counter,
       },
     })

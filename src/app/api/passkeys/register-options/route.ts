@@ -21,14 +21,13 @@ export async function POST() {
     .eq("user_id", session.user.discordId)
 
   const excludeCredentials = (existing ?? []).map((pk: { credential_id: string }) => ({
-    id: Buffer.from(pk.credential_id, "base64url"),
-    type: "public-key" as const,
+    id: pk.credential_id,
   }))
 
   const options = await generateRegistrationOptions({
     rpName: RP_NAME,
     rpID: RP_ID,
-    userID: session.user.discordId,
+    userID: new TextEncoder().encode(session.user.discordId),
     userName: session.user.discordId,
     userDisplayName: session.user.name ?? "Krix",
     attestationType: "none",

@@ -24,8 +24,7 @@ export async function POST() {
   }
 
   const allowCredentials = passkeys.map((pk: { credential_id: string }) => ({
-    id: Buffer.from(pk.credential_id, "base64url"),
-    type: "public-key" as const,
+    id: pk.credential_id,
   }))
 
   const options = await generateAuthenticationOptions({

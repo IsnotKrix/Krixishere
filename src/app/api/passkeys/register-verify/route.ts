@@ -54,17 +54,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Verification failed." }, { status: 400 })
   }
 
-  const { credentialID, credentialPublicKey, counter } = verification.registrationInfo
+  const { credential } = verification.registrationInfo
 
-  const credentialIdB64 = Buffer.from(credentialID as Uint8Array).toString("base64url")
-  const publicKeyB64 = Buffer.from(credentialPublicKey as Uint8Array).toString("base64url")
+  const credentialIdB64 = credential.id
+  const publicKeyB64 = Buffer.from(credential.publicKey).toString("base64url")
 
   // Save the new passkey
   const { error: insertError } = await supabase.from("passkeys").insert({
     user_id: session.user.discordId,
     credential_id: credentialIdB64,
     public_key: publicKeyB64,
-    counter,
+    counter: credential.counter,
     device_name: deviceName ?? "Passkey",
     created_at: new Date().toISOString(),
   })
