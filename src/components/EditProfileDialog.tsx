@@ -214,7 +214,7 @@ function PasskeysTab() {
       const options = await optRes.json();
 
       // 2. Browser prompts for biometric/PIN
-      const registrationResponse = await startRegistration({ optionsJSON: options });
+      const registrationResponse = await startRegistration(options);
 
       // 3. Verify and save on server
       const verRes = await fetch("/api/passkeys/register-verify", {

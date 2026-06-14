@@ -2,7 +2,6 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { getSupabase } from "@/lib/supabase"
 import { verifyRegistrationResponse } from "@simplewebauthn/server"
-import { isoBase64URL } from "@simplewebauthn/server/helpers"
 
 const RP_ID = process.env.NODE_ENV === "production" ? "krixishere.org" : "localhost"
 const ORIGIN =
@@ -57,8 +56,8 @@ export async function POST(req: Request) {
 
   const { credentialID, credentialPublicKey, counter } = verification.registrationInfo
 
-  const credentialIdB64 = isoBase64URL.fromBuffer(credentialID as Uint8Array)
-  const publicKeyB64 = isoBase64URL.fromBuffer(credentialPublicKey as Uint8Array)
+  const credentialIdB64 = Buffer.from(credentialID as Uint8Array).toString("base64url")
+  const publicKeyB64 = Buffer.from(credentialPublicKey as Uint8Array).toString("base64url")
 
   // Save the new passkey
   const { error: insertError } = await supabase.from("passkeys").insert({
