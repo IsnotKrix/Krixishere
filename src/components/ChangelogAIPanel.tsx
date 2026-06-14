@@ -1,0 +1,160 @@
+"use client"
+
+import React, { useState, useRef, useCallback } from "react"
+import { X, Sparkles } from "lucide-react"
+import { AgentChat } from "@/components/agent-elements/agent-chat"
+import type { UIMessage, ChatStatus, SuggestionItem } from "@/components/agent-elements/agent-chat"
+import { cn } from "@/lib/utils"
+
+const SUGGESTIONS: SuggestionItem[] = [
+  { id: "1", label: "What's new?",   value: "What's new in the latest update?" },
+  { id: "2", label: "Tech stack",    value: "What tech stack does this site use?" },
+  { id: "3", label: "All features",  value: "What are the main features of krixishere.org?" },
+  { id: "4", label: "Past releases", value: "Give me a summary of all releases so far." },
+]
+
+interface Props {
+  open: boolean
+  onClose: () => void
+}
+
+export function ChangelogAIPanel({ open, onClose }: Props) {
+  const [messages, setMessages]   = useState<UIMessage[]>([])
+  const [status, setStatus]       = useState<ChatStatus>("ready")
+  const [error, setError]         = useState<Error | undefined>()
+  const abortRef                  = useRef<AbortController | null>(null)
+
+  const handleSend = useCallback(async (msg: { role: "user"; content: string }) => {
+    const userMsg: UIMessage = {
+      id: crypto.randomUUID(),
+      role: "user",
+      parts: [{ type: "text", text: msg.content }],
+      createdAt: new Date(),
+    }
+    const assistantId = crypto.randomUUID()
+    const assistantMsg: UIMessage = {
+      id: assistantId,
+      role: "assistant",
+      parts: [{ type: "text", text: "" }],
+      createdAt: new Date(),
+    }
+
+    setMessages((prev) => {
+      const next = [...prev, userMsg, assistantMsg]
+
+      const apiMessages = next
+        .filter((m) => m.id !== assistantId)
+        .map((m) => ({ role: m.role, content: m.parts[0].text }))
+
+      abortRef.current = new AbortController()
+      setStatus("loading")
+      setError(undefined)
+
+      fetch("/api/changelog-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: apiMessages }),
+        signal: abortRef.current.signal,
+      })
+        .then(async (res) => {
+          if (!res.ok || !res.body) throw new Error("Request failed")
+          setStatus("streaming")
+          const reader  = res.body.getReader()
+          const decoder = new TextDecoder()
+          let text = ""
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            text += decoder.decode(value, { stream: true })
+            setMessages((ms) =>
+              ms.map((m) =>
+                m.id === assistantId
+                  ? { ...m, parts: [{ type: "text" as const, text }] }
+                  : m
+              )
+            )
+          }
+          setStatus("ready")
+        })
+        .catch((err) => {
+          if ((err as Error).name === "AbortError") {
+            setStatus("ready")
+          } else {
+            setError(err as Error)
+            setStatus("error")
+          }
+        })
+
+      return next
+    })
+  }, [])
+
+  const handleStop = useCallback(() => {
+    abortRef.current?.abort()
+    setStatus("ready")
+  }, [])
+
+  return (
+    <>
+      {/* Dim backdrop — click to close */}
+      <div
+        className={cn(
+          "fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300",
+          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        )}
+        onClick={onClose}
+      />
+
+      {/* Slide-in panel */}
+      <div
+        className={cn(
+          "fixed right-0 top-0 bottom-0 z-50 flex flex-col",
+          "w-full sm:w-[380px]",
+          "bg-[#0d0d0d] border-l border-white/[0.08]",
+          "shadow-2xl shadow-black/60",
+          "transition-transform duration-300 ease-in-out",
+          open ? "translate-x-0" : "translate-x-full"
+        )}
+      >
+        {/* Panel header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-violet-500/30 blur-md scale-150" />
+              <div className="relative w-7 h-7 rounded-full bg-gradient-to-br from-violet-500/30 to-purple-700/30 border border-violet-500/30 flex items-center justify-center">
+                <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white leading-none">Krix Assistant</p>
+              <p className="text-[10px] text-zinc-600 mt-0.5">Powered by Claude</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 rounded-full flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Chat area */}
+        <div className="flex-1 min-h-0">
+          <AgentChat
+            messages={messages}
+            onSend={handleSend}
+            status={status}
+            onStop={handleStop}
+            error={error}
+            emptyStatePosition="center"
+            suggestions={{ items: SUGGESTIONS }}
+            emptySuggestionsPlacement="empty"
+            emptySuggestionsPosition="bottom"
+            className="h-full"
+          />
+        </div>
+      </div>
+    </>
+  )
+}

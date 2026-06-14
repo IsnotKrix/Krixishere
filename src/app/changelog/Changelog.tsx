@@ -1,6 +1,7 @@
 "use client"
 
-import { Copy, ExternalLink, GitPullRequest, Maximize2, Shield, LogOut } from "lucide-react"
+import { useState } from "react"
+import { Copy, ExternalLink, GitPullRequest, Maximize2, Shield, LogOut, Sparkles } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
@@ -20,6 +21,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { ContentRenderer } from "@/components/ContentRenderer"
+import { ChangelogAIPanel } from "@/components/ChangelogAIPanel"
 import type { DBRelease } from "@/lib/types"
 
 const MeshGradient = dynamic(
@@ -34,6 +36,7 @@ export function Changelog({ releases }: Props) {
   const authReady = status !== "loading"
   const user = session?.user ?? null
   const adminUser = session?.user?.isAdmin ?? false
+  const [aiOpen, setAiOpen] = useState(false)
 
   const handleCopy = (version: string) => {
     const url = `${window.location.origin}/changelog#${version}`
@@ -56,9 +59,20 @@ export function Changelog({ releases }: Props) {
         <div className="relative container mx-auto px-6 py-14">
           <div className="flex flex-col gap-3 max-w-5xl mx-auto">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm font-medium text-white/80">
-                <GitPullRequest className="size-4" />
-                <p>Changelog</p>
+              <div className="flex items-center gap-3 text-sm font-medium text-white/80">
+                <div className="flex items-center gap-2">
+                  <GitPullRequest className="size-4" />
+                  <p>Changelog</p>
+                </div>
+
+                {/* Ask AI button */}
+                <button
+                  onClick={() => setAiOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/8 border border-white/10 text-white/70 hover:text-white hover:bg-violet-500/15 hover:border-violet-500/30 transition-all text-xs font-medium"
+                >
+                  <Sparkles className="size-3 text-violet-400" />
+                  Ask AI
+                </button>
               </div>
 
               {/* Auth bar */}
@@ -302,6 +316,8 @@ export function Changelog({ releases }: Props) {
           </Dialog>
         ))}
       </div>
+
+      <ChangelogAIPanel open={aiOpen} onClose={() => setAiOpen(false)} />
     </section>
   )
 }
