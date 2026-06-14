@@ -23,17 +23,21 @@ const SUGGESTIONS = [
 ]
 
 const MODELS = [
-  { id: "haiku",  name: "Claude", version: "Haiku 4.5" },
-  { id: "sonnet", name: "Claude", version: "Sonnet 4.6" },
+  { id: "sonnet",         name: "Claude",  version: "Sonnet 4.6" },
+  { id: "haiku",         name: "Claude",  version: "Haiku 4.5" },
+  { id: "gpt-5-mini",    name: "GPT",     version: "5 mini" },
+  { id: "gemini-3-flash", name: "Gemini", version: "3 Flash" },
 ]
 
 interface Props {
   onSend?: (message: string) => void
   onClose?: () => void
   userName?: string
+  model?: string
+  onModelChange?: (model: string) => void
 }
 
-export function AIAssistantCard({ onSend, userName = "there" }: Props) {
+export function AIAssistantCard({ onSend, userName = "there", model, onModelChange }: Props) {
   return (
     <div className="flex h-full w-full flex-col">
       {/* Hero area */}
@@ -85,7 +89,12 @@ export function AIAssistantCard({ onSend, userName = "there" }: Props) {
           onStop={() => {}}
           placeholder="Ask me anything…"
           leftActions={
-            <ModelPicker models={MODELS} defaultValue="haiku" />
+            <ModelPicker
+              models={MODELS}
+              value={model}
+              defaultValue="sonnet"
+              onChange={onModelChange}
+            />
           }
         />
       </div>

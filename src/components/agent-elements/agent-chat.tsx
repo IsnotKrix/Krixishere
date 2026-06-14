@@ -48,6 +48,7 @@ interface AgentChatProps {
   status: ChatStatus;
   onStop: () => void;
   error?: Error;
+  leftActions?: React.ReactNode;
   classNames?: Partial<ChatClassNames>;
   slots?: {
     UserMessage?: React.ComponentType<{
@@ -166,6 +167,7 @@ export function AgentChat({
   emptySuggestionsPosition,
   className,
   style,
+  leftActions,
 }: AgentChatProps) {
   const [injectedValue, setInjectedValue] = React.useState("");
   const isEmpty = messages.length === 0;
@@ -246,6 +248,7 @@ export function AgentChat({
           onPaste={attachments?.onPaste}
           isDragOver={attachments?.isDragOver}
           enableImagePreview={enableImagePreview}
+          leftActions={leftActions}
         />
       </div>
     </div>

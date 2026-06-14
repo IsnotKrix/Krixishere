@@ -390,8 +390,10 @@ export function InputBar({
                 />
                 <ModelPicker
                   models={[
-                    { id: "sonnet", name: "Claude", version: "Sonnet 4.6" },
-                    { id: "haiku",  name: "Claude", version: "Haiku 4.5" },
+                    { id: "sonnet",        name: "Claude",  version: "Sonnet 4.6" },
+                    { id: "haiku",         name: "Claude",  version: "Haiku 4.5" },
+                    { id: "gpt-5-mini",    name: "GPT",     version: "5 mini" },
+                    { id: "gemini-3-flash", name: "Gemini", version: "3 Flash" },
                   ]}
                   defaultValue="sonnet"
                 />

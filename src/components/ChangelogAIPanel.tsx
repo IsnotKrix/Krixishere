@@ -6,7 +6,17 @@ import { useSession } from "next-auth/react"
 import { AgentChat } from "@/components/agent-elements/agent-chat"
 import type { UIMessage, ChatStatus } from "@/components/agent-elements/agent-chat"
 import { AIAssistantCard } from "@/components/ui/ai-assistant-card"
+import { ModelPicker } from "@/components/agent-elements/input/model-picker"
+import { ModeSelector } from "@/components/agent-elements/input/mode-selector"
+import { IconInfinity } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
+
+const MODELS = [
+  { id: "sonnet",          name: "Claude",  version: "Sonnet 4.6" },
+  { id: "haiku",           name: "Claude",  version: "Haiku 4.5" },
+  { id: "gpt-5-mini",      name: "GPT",     version: "5 mini" },
+  { id: "gemini-3-flash",  name: "Gemini",  version: "3 Flash" },
+]
 
 interface Props {
   open: boolean
@@ -21,10 +31,11 @@ export function ChangelogAIPanel({ open, onClose, initialMessage }: Props) {
   const [messages, setMessages] = useState<UIMessage[]>([])
   const [status, setStatus]     = useState<ChatStatus>("ready")
   const [error, setError]       = useState<Error | undefined>()
+  const [model, setModel]       = useState("sonnet")
   const abortRef                = useRef<AbortController | null>(null)
   const sentInitialRef          = useRef<string>("")
 
-  const sendMessage = useCallback((content: string) => {
+  const sendMessage = useCallback((content: string, selectedModel?: string) => {
     const userMsg: UIMessage = {
       id: crypto.randomUUID(),
       role: "user",
@@ -52,7 +63,7 @@ export function ChangelogAIPanel({ open, onClose, initialMessage }: Props) {
       fetch("/api/changelog-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages }),
+        body: JSON.stringify({ messages: apiMessages, model: selectedModel ?? model }),
         signal: abortRef.current.signal,
       })
         .then(async (res) => {
@@ -89,8 +100,8 @@ export function ChangelogAIPanel({ open, onClose, initialMessage }: Props) {
   }, [])
 
   const handleSend = useCallback(
-    (msg: { role: "user"; content: string }) => sendMessage(msg.content),
-    [sendMessage]
+    (msg: { role: "user"; content: string }) => sendMessage(msg.content, model),
+    [sendMessage, model]
   )
 
   const handleStop = useCallback(() => {
@@ -167,8 +178,10 @@ export function ChangelogAIPanel({ open, onClose, initialMessage }: Props) {
           {messages.length === 0 ? (
             <AIAssistantCard
               userName={userName}
-              onSend={(msg) => sendMessage(msg)}
+              onSend={(msg) => sendMessage(msg, model)}
               onClose={onClose}
+              model={model}
+              onModelChange={setModel}
             />
           ) : (
             <AgentChat
@@ -178,6 +191,19 @@ export function ChangelogAIPanel({ open, onClose, initialMessage }: Props) {
               onStop={handleStop}
               error={error}
               className="h-full"
+              leftActions={
+                <>
+                  <ModeSelector
+                    modes={[{ id: "agent", label: "Agent", icon: IconInfinity }]}
+                    defaultValue="agent"
+                  />
+                  <ModelPicker
+                    models={MODELS}
+                    value={model}
+                    onChange={setModel}
+                  />
+                </>
+              }
             />
           )}
         </div>

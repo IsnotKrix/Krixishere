@@ -33,9 +33,19 @@ export async function POST(req: Request) {
     });
   }
 
-  const { messages } = (await req.json()) as {
-    messages: Array<{ role: "user" | "assistant"; content: string }>;
+  const MODEL_MAP: Record<string, string> = {
+    sonnet:          "claude-sonnet-4-6",
+    haiku:           "claude-haiku-4-5-20251001",
+    "gpt-5-mini":    "gpt-5-mini",
+    "gemini-3-flash": "gemini-3-flash",
   };
+
+  const { messages, model: modelId = "sonnet" } = (await req.json()) as {
+    messages: Array<{ role: "user" | "assistant"; content: string }>;
+    model?: string;
+  };
+
+  const model = MODEL_MAP[modelId] ?? MODEL_MAP.sonnet;
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -50,7 +60,7 @@ export async function POST(req: Request) {
       method: "POST",
       headers,
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model,
         stream: true,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
