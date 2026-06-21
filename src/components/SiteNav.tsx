@@ -8,6 +8,7 @@ import { GithubIcon } from "@/components/icons"
 const navLinks = [
   { label: "About", href: "/#about" },
   { label: "Projects", href: "/#projects" },
+  { label: "Blog", href: "/blog" },
   { label: "Changelog", href: "/changelog" },
 ]
 
@@ -46,7 +47,6 @@ export function SiteNav() {
       transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
       className="fixed top-0 left-0 right-0 z-50 pointer-events-none flex justify-center"
     >
-      {/* Overlay for mobile — closes menu on outside tap */}
       {isMobile && mobileOpen && (
         <div
           className="fixed inset-0 z-[-1]"
