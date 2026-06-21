@@ -154,6 +154,8 @@ function CompactRow({ post, index }: { post: DBPost; index: number }) {
   )
 }
 
+const HERO_IMAGE = "https://www.iclarified.com/images/news/94502/451898/451898.jpg"
+
 export function BlogListing({ posts }: { posts: DBPost[] }) {
   const sorted = [...posts].sort(
     (a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
@@ -166,23 +168,49 @@ export function BlogListing({ posts }: { posts: DBPost[] }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
 
-      {/* Header */}
-      <div className="max-w-6xl mx-auto px-5 sm:px-6 pt-24 pb-10">
-        <motion.div custom={0} initial="hidden" animate="visible" variants={slideUp} className="flex items-end justify-between gap-4 mb-10">
-          <div>
-            <p className="text-[9px] font-mono uppercase tracking-[0.35em] text-foreground/25 mb-2">
-              krix · blog
-            </p>
-            <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-none">
-              Writing
-            </h1>
-          </div>
-          <p className="text-xs text-muted-foreground max-w-[200px] text-right leading-relaxed hidden sm:block">
-            Notes on building games and web things.
-          </p>
-        </motion.div>
+      {/* Hero image banner */}
+      <div className="relative w-full h-[45vh] min-h-[280px] overflow-hidden">
+        <Image
+          src={HERO_IMAGE}
+          alt=""
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background to-transparent" />
 
-        {/* Hero post */}
+        <div className="absolute inset-0 flex flex-col justify-end max-w-6xl mx-auto px-5 sm:px-6 pb-10">
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-xs uppercase tracking-[0.35em] text-white/40 mb-2 font-mono"
+          >
+            Blog
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            className="text-5xl md:text-7xl font-bold text-white leading-none tracking-tight mb-3"
+          >
+            Writing
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.28 }}
+            className="text-white/50 text-sm max-w-sm leading-relaxed"
+          >
+            Notes on Roblox development, web building, and everything in between.
+          </motion.p>
+        </div>
+      </div>
+
+      {/* Latest post hero */}
+      <div className="max-w-6xl mx-auto px-5 sm:px-6 pt-10 pb-0">
         {hero && <HeroPost post={hero} />}
       </div>
 
