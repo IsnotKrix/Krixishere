@@ -21,9 +21,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Krix — Developer & Designer",
-  description: "Full-stack developer crafting fast, beautiful, and purposeful digital experiences.",
-  keywords: ["developer", "portfolio", "full-stack", "web development"],
+  title: "Krix — Roblox Developer",
+  description: "Roblox developer and web builder. Projects, experiments, and everything I'm working on.",
+  keywords: ["roblox", "developer", "portfolio", "web development", "game dev"],
 };
 
 export default async function RootLayout({
@@ -44,7 +44,7 @@ export default async function RootLayout({
           <RepoButton />
           {children}
           <Footer
-            logo={<Code2 className="size-6 text-violet-400" />}
+            logo={<Code2 className="size-6 text-foreground/60" />}
             brandName="Krix"
             socialLinks={[
               { icon: <IconBrandGithub className="size-4" />, href: "https://github.com", label: "GitHub" },
@@ -63,7 +63,7 @@ export default async function RootLayout({
               license: "All rights reserved",
             }}
           />
-          <PortfolioNav />
+          {/* <PortfolioNav /> */}
         </Providers>
       </body>
     </html>
