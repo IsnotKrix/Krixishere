@@ -11,14 +11,14 @@ export default function TermsPage() {
         <div className="mb-10">
           <p className="text-xs font-mono uppercase tracking-[0.25em] text-muted-foreground mb-3">Legal</p>
           <h1 className="text-3xl font-bold">Terms of Service</h1>
-          <p className="text-muted-foreground text-sm mt-2 font-mono">Last updated: June 14, 2026</p>
+          <p className="text-muted-foreground text-sm mt-2 font-mono">Last updated: June 21, 2026</p>
         </div>
 
         <div className="space-y-8 text-[15px] text-muted-foreground leading-relaxed">
           <section className="space-y-3">
             <h2 className="text-foreground font-semibold text-lg">1. Acceptance of Terms</h2>
             <p>
-              By accessing and using krixishere.org (the "Service"), you agree to be bound
+              By accessing and using krixishere.org (the “Service”), you agree to be bound
               by these Terms of Service. If you do not agree, please do not use the Service.
             </p>
           </section>
@@ -54,16 +54,26 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-foreground font-semibold text-lg">5. Third-Party Services</h2>
             <p>
-              The Service uses Discord for authentication. Your use of Discord is governed
-              by Discord's own Terms of Service and Privacy Policy, which are separate from
-              these Terms.
+              The Service uses Clerk (clerk.com) for authentication, which in turn uses Discord
+              as an OAuth identity provider. Your use of these services is governed by their
+              respective Terms of Service and Privacy Policies, which are separate from these Terms.
+              By signing in, you acknowledge and agree to Clerk's{" "}
+              <a href="https://clerk.com/terms" target="_blank" rel="noopener noreferrer"
+                className="text-foreground/70 hover:text-foreground underline underline-offset-2 transition-colors">
+                Terms of Service
+              </a>{" "}
+              and Discord's{" "}
+              <a href="https://discord.com/terms" target="_blank" rel="noopener noreferrer"
+                className="text-foreground/70 hover:text-foreground underline underline-offset-2 transition-colors">
+                Terms of Service
+              </a>.
             </p>
           </section>
 
           <section className="space-y-3">
             <h2 className="text-foreground font-semibold text-lg">6. Disclaimer of Warranties</h2>
             <p>
-              The Service is provided "as is" without warranties of any kind, either express
+              The Service is provided “as is” without warranties of any kind, either express
               or implied. We do not guarantee that the Service will be uninterrupted, error-free,
               or secure.
             </p>

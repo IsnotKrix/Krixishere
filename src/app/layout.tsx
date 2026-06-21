@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import RepoButton from "@/components/RepoButton";
+import { PortfolioNav } from "@/components/PortfolioNav";
 import { PageLoader } from "@/components/PageLoader";
-import { Providers } from "@/components/Providers";
 import { FlickeringFooter } from "@/components/ui/flickering-footer";
-import { SiteNav } from "@/components/SiteNav";
-import { auth } from "@/auth";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
@@ -22,46 +22,29 @@ export const metadata: Metadata = {
   title: "Krix — Roblox Developer",
   description: "Roblox developer and web builder. Projects, experiments, and everything I'm working on.",
   keywords: ["roblox", "developer", "portfolio", "web development", "game dev"],
-  openGraph: {
-    title: "Krix — Roblox Developer",
-    description: "Roblox developer and web builder. Projects, experiments, and everything I'm working on.",
-    url: "https://krixishere.org",
-    siteName: "krixishere.org",
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Krix — Roblox Developer",
-    description: "Roblox developer and web builder. Projects, experiments, and everything I'm working on.",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth()
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-      suppressHydrationWarning
-    >
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        <Providers session={session}>
+    <ClerkProvider>
+      <html
+        lang="en"
+        className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+        suppressHydrationWarning
+      >
+        <body className="min-h-full flex flex-col" suppressHydrationWarning>
           <PageLoader />
-          <SiteNav />
+          <RepoButton />
+          <PortfolioNav />
           {children}
           <FlickeringFooter />
           <Analytics />
-        </Providers>
-      </body>
-    </html>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

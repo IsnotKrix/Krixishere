@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 }
 
 async function getPosts(): Promise<DBPost[]> {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return []
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return staticPosts
   try {
     const { getSupabase } = await import("@/lib/supabase")
     const supabase = getSupabase()

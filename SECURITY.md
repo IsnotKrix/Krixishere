@@ -15,7 +15,7 @@ If you discover a security vulnerability, please **do not** open a public GitHub
 
 Instead, report it privately by emailing:
 
-**security@krixishere.org**
+**support@krixishere.org**
 
 Please include:
 - A description of the vulnerability

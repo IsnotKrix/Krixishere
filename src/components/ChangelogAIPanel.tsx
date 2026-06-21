@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from "react"
 import { X, Sparkles } from "lucide-react"
-import { useSession } from "next-auth/react"
+import { useUser } from "@clerk/nextjs"
 import { AgentChat } from "@/components/agent-elements/agent-chat"
 import type { UIMessage, ChatStatus } from "@/components/agent-elements/agent-chat"
 import { AIAssistantCard } from "@/components/ui/ai-assistant-card"
@@ -24,8 +24,8 @@ interface Props {
 }
 
 export function ChangelogAIPanel({ open, onClose, initialMessage }: Props) {
-  const { data: session }       = useSession()
-  const userName                = session?.user?.name?.split(" ")[0] ?? "there"
+  const { user }                = useUser()
+  const userName                = user?.firstName ?? user?.username?.split(" ")[0] ?? "there"
   const [messages, setMessages] = useState<UIMessage[]>([])
   const [status, setStatus]     = useState<ChatStatus>("ready")
   const [error, setError]       = useState<Error | undefined>()
@@ -107,18 +107,15 @@ export function ChangelogAIPanel({ open, onClose, initialMessage }: Props) {
     setStatus("ready")
   }, [])
 
-  // Auto-send the initial message once when the panel opens with a new message
   useEffect(() => {
     if (open && initialMessage && sentInitialRef.current !== initialMessage) {
       sentInitialRef.current = initialMessage
       setMessages([])
-      // Small delay so the panel slide-in animation plays first
       const t = setTimeout(() => sendMessage(initialMessage), 200)
       return () => clearTimeout(t)
     }
   }, [open, initialMessage, sendMessage])
 
-  // Reset when panel closes
   useEffect(() => {
     if (!open) {
       abortRef.current?.abort()
@@ -128,7 +125,6 @@ export function ChangelogAIPanel({ open, onClose, initialMessage }: Props) {
 
   return (
     <>
-      {/* Dim backdrop — click to close */}
       <div
         className={cn(
           "fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300",
@@ -137,7 +133,6 @@ export function ChangelogAIPanel({ open, onClose, initialMessage }: Props) {
         onClick={onClose}
       />
 
-      {/* Slide-in panel */}
       <div
         className={cn(
           "fixed right-0 top-0 bottom-0 z-50 flex flex-col",
@@ -148,7 +143,6 @@ export function ChangelogAIPanel({ open, onClose, initialMessage }: Props) {
           open ? "translate-x-0" : "translate-x-full"
         )}
       >
-        {/* Panel header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="relative">
@@ -171,7 +165,6 @@ export function ChangelogAIPanel({ open, onClose, initialMessage }: Props) {
           </button>
         </div>
 
-        {/* Chat area — card on empty, chat when conversation started */}
         <div className="flex-1 min-h-0 overflow-y-auto">
           {messages.length === 0 ? (
             <AIAssistantCard

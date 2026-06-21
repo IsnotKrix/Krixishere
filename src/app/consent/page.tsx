@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
-import { signIn } from "next-auth/react"
+import { useSignIn } from "@clerk/nextjs"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { DiscordIcon } from "@/components/DiscordIcon"
@@ -10,13 +10,19 @@ import { DiscordIcon } from "@/components/DiscordIcon"
 function ConsentForm() {
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") ?? "/"
+  const { signIn, fetchStatus } = useSignIn()
   const [accepted, setAccepted] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const handleLogin = async () => {
-    if (!accepted) return
+    if (!accepted || loading || !signIn || fetchStatus !== "idle") return
     setLoading(true)
-    await signIn("discord", { callbackUrl })
+    const { error } = await signIn.sso({
+      strategy: "oauth_discord",
+      redirectUrl: callbackUrl,
+      redirectCallbackUrl: "/",
+    })
+    if (error) setLoading(false)
   }
 
   return (
@@ -55,7 +61,7 @@ function ConsentForm() {
         >
           <div>
             <p className="text-sm font-medium text-white">Privacy Policy</p>
-            <p className="text-xs text-zinc-500 mt-0.5">We only collect your Discord username, avatar & ID</p>
+            <p className="text-xs text-zinc-500 mt-0.5">We only collect your Discord username, avatar &amp; ID</p>
           </div>
           <svg className="size-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" strokeLinecap="round" strokeLinejoin="round"/>
@@ -80,7 +86,7 @@ function ConsentForm() {
       {/* Login button */}
       <Button
         onClick={handleLogin}
-        disabled={!accepted || loading}
+        disabled={!accepted || loading || fetchStatus !== "idle"}
         className="w-full rounded-full bg-[#5865F2] hover:bg-[#4752C4] text-white gap-2.5 h-11 font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
       >
         <DiscordIcon className="size-4" />
