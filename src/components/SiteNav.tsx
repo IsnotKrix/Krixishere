@@ -14,49 +14,57 @@ export function SiteNav() {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40)
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
+    const check = () => setScrolled(window.scrollY > 50)
+    check()
+    window.addEventListener("scroll", check, { passive: true })
+    return () => window.removeEventListener("scroll", check)
   }, [])
 
   return (
     <motion.header
-      initial={{ opacity: 0, y: -16 }}
+      initial={{ opacity: 0, y: -12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-background/80 backdrop-blur-md border-b border-border"
-          : "bg-transparent"
-      }`}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+      className="fixed top-0 left-0 right-0 z-50 pointer-events-none"
     >
-      <nav className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-        <Link href="/" className="text-foreground font-bold font-mono tracking-tight text-base hover:text-foreground/80 transition-colors">
-          krix<span className="text-muted-foreground">.</span>
-        </Link>
-
-        <div className="flex items-center gap-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors font-mono rounded-md hover:bg-white/[0.04]"
-            >
-              {link.label}
-            </Link>
-          ))}
-          <div className="w-px h-4 bg-border mx-2" />
-          <a
-            href="https://github.com/isnotkrix/krixishere"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-white/[0.04]"
-            aria-label="GitHub"
+      <div
+        className={`pointer-events-auto transition-all duration-500 ease-in-out ${
+          scrolled
+            ? "mx-4 mt-3 rounded-2xl bg-[#161616]/90 backdrop-blur-2xl ring-1 ring-white/[0.07] shadow-[0_4px_32px_rgba(0,0,0,0.6)]"
+            : "mx-0 mt-0 rounded-none bg-transparent"
+        }`}
+      >
+        <nav className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
+          <Link
+            href="/"
+            className="text-foreground/90 font-bold font-mono tracking-tight text-sm hover:text-foreground transition-colors duration-200"
           >
-            <GithubIcon size={15} />
-          </a>
-        </div>
-      </nav>
+            krix<span className="text-muted-foreground/50">.</span>
+          </Link>
+
+          <div className="flex items-center gap-0.5">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground/90 transition-colors duration-200 font-mono rounded-lg hover:bg-white/[0.05] tracking-wide"
+              >
+                {link.label}
+              </Link>
+            ))}
+            <div className="w-px h-3.5 bg-white/10 mx-1.5" />
+            <a
+              href="https://github.com/isnotkrix/krixishere"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-1.5 text-muted-foreground hover:text-foreground/90 transition-colors duration-200 rounded-lg hover:bg-white/[0.05]"
+              aria-label="GitHub"
+            >
+              <GithubIcon size={14} />
+            </a>
+          </div>
+        </nav>
+      </div>
     </motion.header>
   )
 }

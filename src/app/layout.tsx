@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import RepoButton from "@/components/RepoButton";
 import { PageLoader } from "@/components/PageLoader";
 import { Providers } from "@/components/Providers";
 import { FlickeringFooter } from "@/components/ui/flickering-footer";
@@ -58,7 +57,6 @@ export default async function RootLayout({
         <Providers session={session}>
           <PageLoader />
           <SiteNav />
-          <RepoButton />
           {children}
           <FlickeringFooter />
           <Analytics />
