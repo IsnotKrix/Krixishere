@@ -1,7 +1,13 @@
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 
-// Passkey 2FA proxy — awaiting migration to Clerk-based auth
-export async function proxy(_request: NextRequest) {
-  return NextResponse.next()
+const isProtectedRoute = createRouteMatcher(["/admin(.*)"])
+
+export const proxy = clerkMiddleware(async (auth, req) => {
+  if (isProtectedRoute(req)) {
+    await auth.protect()
+  }
+})
+
+export const config = {
+  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
 }
