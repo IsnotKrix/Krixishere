@@ -4,6 +4,16 @@ import { useScreenSize } from "@/hooks/use-screen-size"
 import { PixelTrail } from "@/components/ui/pixel-trail"
 import { GooeyFilter } from "@/components/ui/gooey-filter"
 import { ExternalLink, Clock } from "lucide-react"
+import { motion } from "framer-motion"
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, delay: i * 0.15, ease: [0.25, 0.1, 0.25, 1] },
+  }),
+}
 
 export default function Home() {
   const screenSize = useScreenSize()
@@ -14,41 +24,66 @@ export default function Home() {
       {/* Hero */}
       <section className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden">
         <img
-          src="/hero-bg.jpg"
+          src="https://www.iclarified.com/images/news/94502/451898/451898.jpg"
           alt="Background"
           className="w-full h-full object-cover absolute inset-0"
         />
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-black/55" />
 
-        <GooeyFilter id="gooey-filter-hero" strength={5} />
+        <GooeyFilter id="gooey-filter-hero" strength={8} />
         <div
           className="absolute inset-0 z-0"
           style={{ filter: "url(#gooey-filter-hero)" }}
         >
           <PixelTrail
-            pixelSize={screenSize.lessThan("md") ? 24 : 32}
-            fadeDuration={0}
-            delay={500}
-            pixelClassName="bg-white/30"
+            pixelSize={screenSize.lessThan("md") ? 20 : 28}
+            fadeDuration={600}
+            delay={0}
+            pixelClassName="bg-white/40 rounded-full"
           />
         </div>
 
         <div className="relative z-10 text-center px-6 max-w-3xl mx-auto">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/50 mb-5 font-mono">
+          <motion.p
+            custom={0}
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            className="text-xs uppercase tracking-[0.3em] text-white/50 mb-5 font-mono"
+          >
             Roblox Developer
-          </p>
-          <h1 className="text-7xl md:text-9xl font-bold text-white mb-6 tracking-tight leading-none">
+          </motion.p>
+          <motion.h1
+            custom={1}
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            className="text-7xl md:text-9xl font-bold text-white mb-6 tracking-tight leading-none"
+          >
             Krix
-          </h1>
-          <p className="text-lg text-white/60 max-w-md mx-auto leading-relaxed">
+          </motion.h1>
+          <motion.p
+            custom={2}
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            className="text-lg text-white/60 max-w-md mx-auto leading-relaxed"
+          >
             I build experiences in Roblox and on the web. Developer, creator, and builder of things that matter.
-          </p>
+          </motion.p>
         </div>
 
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2, duration: 0.8 }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
+        >
           <span className="text-xs text-white/30 tracking-widest uppercase font-mono">Scroll</span>
           <div className="w-px h-12 bg-gradient-to-b from-white/30 to-transparent" />
-        </div>
+        </motion.div>
+
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
       </section>
 
       {/* About */}
