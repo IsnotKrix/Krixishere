@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
-import { signIn } from "next-auth/react"
+import { useSignIn } from "@clerk/nextjs"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { DiscordIcon } from "@/components/DiscordIcon"
@@ -10,13 +10,19 @@ import { DiscordIcon } from "@/components/DiscordIcon"
 function ConsentForm() {
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") ?? "/"
+  const { signIn, fetchStatus } = useSignIn()
   const [accepted, setAccepted] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const handleLogin = async () => {
-    if (!accepted) return
+    if (!accepted || loading || !signIn || fetchStatus !== "idle") return
     setLoading(true)
-    await signIn("discord", { callbackUrl })
+    const { error } = await signIn.sso({
+      strategy: "oauth_discord",
+      redirectUrl: callbackUrl,
+      redirectCallbackUrl: "/",
+    })
+    if (error) setLoading(false)
   }
 
   return (
@@ -80,7 +86,7 @@ function ConsentForm() {
       {/* Login button */}
       <Button
         onClick={handleLogin}
-        disabled={!accepted || loading}
+        disabled={!accepted || loading || fetchStatus !== "idle"}
         className="w-full rounded-full bg-[#5865F2] hover:bg-[#4752C4] text-white gap-2.5 h-11 font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
       >
         <DiscordIcon className="size-4" />

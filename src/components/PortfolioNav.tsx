@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { NavBar } from "@/components/ui/tubelight-navbar";
 import { Home, ScrollText, User, Key, LogOut, Shield } from "lucide-react";
-import { useSession, signOut } from "next-auth/react";
+import { useUser, useClerk } from "@clerk/nextjs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,11 +33,12 @@ function UserAvatar({ src, name }: { src?: string | null; name?: string | null }
 }
 
 export function PortfolioNav() {
-  const { data: session } = useSession();
+  const { user } = useUser();
+  const { signOut } = useClerk();
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileTab, setProfileTab] = useState<"Profile" | "Security">("Profile");
 
-  const avatarSlot = session?.user ? (
+  const avatarSlot = user ? (
     <>
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
@@ -45,13 +46,13 @@ export function PortfolioNav() {
             className="relative cursor-pointer px-1.5 py-1.5 rounded-full transition-colors hover:bg-white/5 focus:outline-none"
             aria-label="User menu"
           >
-            <UserAvatar src={session.user.image} name={session.user.name} />
+            <UserAvatar src={user.imageUrl} name={user.fullName ?? user.username} />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="top" align="end" className="w-52">
           <DropdownMenuLabel className="flex flex-col gap-0.5 pb-2">
             <span className="font-semibold text-sm text-foreground">
-              {session.user.name}
+              {user.fullName ?? user.username}
             </span>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
@@ -69,7 +70,7 @@ export function PortfolioNav() {
             <Key className="h-4 w-4 mr-2" />
             Manage Passkeys
           </DropdownMenuItem>
-          {session.user.isAdmin && (
+          {(user.publicMetadata as { isAdmin?: boolean })?.isAdmin === true && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -84,7 +85,7 @@ export function PortfolioNav() {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
-            onSelect={() => signOut()}
+            onSelect={() => signOut({ redirectUrl: "/" })}
           >
             <LogOut className="h-4 w-4 mr-2" />
             Sign out

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from "react"
 import { X, Sparkles } from "lucide-react"
-import { useSession } from "next-auth/react"
+import { useUser } from "@clerk/nextjs"
 import { AgentChat } from "@/components/agent-elements/agent-chat"
 import type { UIMessage, ChatStatus } from "@/components/agent-elements/agent-chat"
 import { AIAssistantCard } from "@/components/ui/ai-assistant-card"
@@ -24,8 +24,8 @@ interface Props {
 }
 
 export function ChangelogAIPanel({ open, onClose, initialMessage }: Props) {
-  const { data: session }       = useSession()
-  const userName                = session?.user?.name?.split(" ")[0] ?? "there"
+  const { user }                = useUser()
+  const userName                = user?.firstName ?? user?.username?.split(" ")[0] ?? "there"
   const [messages, setMessages] = useState<UIMessage[]>([])
   const [status, setStatus]     = useState<ChatStatus>("ready")
   const [error, setError]       = useState<Error | undefined>()

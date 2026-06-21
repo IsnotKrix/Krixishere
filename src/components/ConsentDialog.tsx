@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { signIn } from "next-auth/react"
+import { useSignIn } from "@clerk/nextjs"
 import { motion, AnimatePresence } from "framer-motion"
 import { X } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -14,13 +14,19 @@ interface ConsentDialogProps {
 }
 
 export function ConsentDialog({ open, onClose, callbackUrl = "/" }: ConsentDialogProps) {
+  const { signIn, fetchStatus } = useSignIn()
   const [accepted, setAccepted] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const handleLogin = async () => {
-    if (!accepted || loading) return
+    if (!accepted || loading || !signIn || fetchStatus !== "idle") return
     setLoading(true)
-    await signIn("discord", { callbackUrl })
+    const { error } = await signIn.sso({
+      strategy: "oauth_discord",
+      redirectUrl: callbackUrl,
+      redirectCallbackUrl: "/",
+    })
+    if (error) setLoading(false)
   }
 
   return (
@@ -117,7 +123,7 @@ export function ConsentDialog({ open, onClose, callbackUrl = "/" }: ConsentDialo
               <div className="px-5 pb-5 pt-1 flex flex-col gap-2">
                 <button
                   onClick={handleLogin}
-                  disabled={!accepted || loading}
+                  disabled={!accepted || loading || fetchStatus !== "idle"}
                   className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-lg text-sm font-mono border border-border text-foreground/70 hover:text-foreground hover:border-foreground/30 hover:bg-foreground/[0.04] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <DiscordIcon className="size-4 text-[#5865F2]" />

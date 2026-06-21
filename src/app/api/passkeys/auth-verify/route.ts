@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/auth"
+import { auth } from "@clerk/nextjs/server"
 import { getSupabase } from "@/lib/supabase"
 import { tfaToken } from "@/lib/tfa"
 import { verifyAuthenticationResponse } from "@simplewebauthn/server"
@@ -11,19 +11,16 @@ const ORIGIN =
     : "http://localhost:3000"
 
 export async function POST(req: Request) {
-  const session = await auth()
-  if (!session?.user?.discordId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { response } = await req.json()
   const supabase = getSupabase()
 
-  // Retrieve stored challenge
   const { data: challengeRow } = await supabase
     .from("passkey_challenges")
     .select("challenge, created_at")
-    .eq("user_id", session.user.discordId)
+    .eq("user_id", userId)
     .single()
 
   if (!challengeRow) {
@@ -32,16 +29,15 @@ export async function POST(req: Request) {
 
   const createdAt = new Date(challengeRow.created_at).getTime()
   if (Date.now() - createdAt > 5 * 60 * 1000) {
-    await supabase.from("passkey_challenges").delete().eq("user_id", session.user.discordId)
+    await supabase.from("passkey_challenges").delete().eq("user_id", userId)
     return NextResponse.json({ error: "Challenge expired. Please try again." }, { status: 400 })
   }
 
-  // Find the matching passkey by credential ID
   const credentialIdB64 = response.id
   const { data: passkey } = await supabase
     .from("passkeys")
     .select("*")
-    .eq("user_id", session.user.discordId)
+    .eq("user_id", userId)
     .eq("credential_id", credentialIdB64)
     .single()
 
@@ -70,23 +66,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Verification failed." }, { status: 400 })
   }
 
-  // Update counter to prevent replay attacks
   await supabase
     .from("passkeys")
     .update({ counter: verification.authenticationInfo.newCounter })
     .eq("credential_id", credentialIdB64)
 
-  // Clean up challenge
-  await supabase.from("passkey_challenges").delete().eq("user_id", session.user.discordId)
+  await supabase.from("passkey_challenges").delete().eq("user_id", userId)
 
-  // Set 2FA verified cookie — HMAC-signed with discordId so it's account-bound
   const res = NextResponse.json({ success: true })
-  res.cookies.set("x-tfa", tfaToken(session.user.discordId!), {
+  res.cookies.set("x-tfa", tfaToken(userId), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     path: "/",
-    maxAge: 60 * 60 * 24, // 24 hours
+    maxAge: 60 * 60 * 24,
   })
   return res
 }

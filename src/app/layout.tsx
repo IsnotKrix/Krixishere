@@ -4,9 +4,8 @@ import "./globals.css";
 import RepoButton from "@/components/RepoButton";
 import { PortfolioNav } from "@/components/PortfolioNav";
 import { PageLoader } from "@/components/PageLoader";
-import { Providers } from "@/components/Providers";
 import { FlickeringFooter } from "@/components/ui/flickering-footer";
-import { auth } from "@/auth";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
@@ -25,28 +24,27 @@ export const metadata: Metadata = {
   keywords: ["roblox", "developer", "portfolio", "web development", "game dev"],
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth()
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-      suppressHydrationWarning
-    >
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        <Providers session={session}>
+    <ClerkProvider>
+      <html
+        lang="en"
+        className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+        suppressHydrationWarning
+      >
+        <body className="min-h-full flex flex-col" suppressHydrationWarning>
           <PageLoader />
           <RepoButton />
+          <PortfolioNav />
           {children}
           <FlickeringFooter />
-          {/* <PortfolioNav /> */}
           <Analytics />
-        </Providers>
-      </body>
-    </html>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

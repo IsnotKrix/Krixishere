@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/auth"
+import { auth, currentUser } from "@clerk/nextjs/server"
 import { getSupabase } from "@/lib/supabase"
 import { generateRegistrationOptions } from "@simplewebauthn/server"
 
@@ -7,18 +7,16 @@ const RP_NAME = "krixishere.org"
 const RP_ID = process.env.NODE_ENV === "production" ? "krixishere.org" : "localhost"
 
 export async function POST() {
-  const session = await auth()
-  if (!session?.user?.discordId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
+  const user = await currentUser()
   const supabase = getSupabase()
 
-  // Fetch existing credentials so we can exclude them
   const { data: existing } = await supabase
     .from("passkeys")
     .select("credential_id")
-    .eq("user_id", session.user.discordId)
+    .eq("user_id", userId)
 
   const excludeCredentials = (existing ?? []).map((pk: { credential_id: string }) => ({
     id: pk.credential_id,
@@ -27,9 +25,9 @@ export async function POST() {
   const options = await generateRegistrationOptions({
     rpName: RP_NAME,
     rpID: RP_ID,
-    userID: new TextEncoder().encode(session.user.discordId),
-    userName: session.user.discordId,
-    userDisplayName: session.user.name ?? "Krix",
+    userID: new TextEncoder().encode(userId),
+    userName: userId,
+    userDisplayName: user?.fullName ?? user?.username ?? "User",
     attestationType: "none",
     excludeCredentials,
     authenticatorSelection: {
@@ -38,9 +36,8 @@ export async function POST() {
     },
   })
 
-  // Store challenge temporarily in Supabase (expires after 5 min)
   await supabase.from("passkey_challenges").upsert({
-    user_id: session.user.discordId,
+    user_id: userId,
     challenge: options.challenge,
     created_at: new Date().toISOString(),
   })

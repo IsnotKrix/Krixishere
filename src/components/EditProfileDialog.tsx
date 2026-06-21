@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useUser } from "@clerk/nextjs";
 import { startRegistration } from "@simplewebauthn/browser";
 import { ImagePlus, Key, Loader2, Plus, Trash2, X } from "lucide-react";
 import {
@@ -76,7 +76,7 @@ function AvatarWidget({ defaultSrc }: { defaultSrc?: string | null }) {
 // ─── Profile tab ──────────────────────────────────────────────────────────────
 
 function ProfileTab({ onSaved }: { onSaved: () => void }) {
-  const { data: session } = useSession();
+  const { user } = useUser();
   const id = useId();
   const [profile, setProfile] = useState<ProfileData>({ display_name: null, bio: null, website: null });
   const [saving, setSaving] = useState(false);
@@ -122,13 +122,13 @@ function ProfileTab({ onSaved }: { onSaved: () => void }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <AvatarWidget defaultSrc={session?.user?.image} />
+      <AvatarWidget defaultSrc={user?.imageUrl} />
 
       <div className="space-y-2">
         <Label htmlFor={`${id}-name`}>Display name</Label>
         <Input
           id={`${id}-name`}
-          placeholder={session?.user?.name ?? "Your name"}
+          placeholder={user?.fullName ?? user?.username ?? "Your name"}
           value={profile.display_name ?? ""}
           onChange={(e) => setProfile((p) => ({ ...p, display_name: e.target.value }))}
         />

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Copy, ExternalLink, GitPullRequest, Maximize2, Shield, LogOut } from "lucide-react"
 import dynamic from "next/dynamic"
-import { useSession, signOut } from "next-auth/react"
+import { useUser, useClerk } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { DiscordIcon } from "@/components/DiscordIcon"
 import {
@@ -33,10 +33,10 @@ const MeshGradient = dynamic(
 type Props = { releases: DBRelease[] }
 
 export function Changelog({ releases }: Props) {
-  const { data: session, status } = useSession()
-  const authReady = status !== "loading"
-  const user = session?.user ?? null
-  const adminUser = session?.user?.isAdmin ?? false
+  const { user, isLoaded } = useUser()
+  const { signOut } = useClerk()
+  const authReady = isLoaded
+  const adminUser = (user?.publicMetadata as { isAdmin?: boolean })?.isAdmin === true
   const [aiOpen, setAiOpen]             = useState(false)
   const [pendingMessage, setPendingMessage] = useState("")
 
@@ -69,7 +69,7 @@ export function Changelog({ releases }: Props) {
               {/* Auth bar */}
               {authReady && (
                 <div className="flex items-center gap-2">
-                  {user ? (
+                  {user && isLoaded ? (
                     <>
                       {adminUser && (
                         <Button
@@ -87,7 +87,7 @@ export function Changelog({ releases }: Props) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => signOut()}
+                        onClick={() => signOut({ redirectUrl: "/" })}
                         className="text-zinc-400 hover:text-white rounded-full text-xs"
                       >
                         <LogOut className="size-3.5 mr-1.5" />

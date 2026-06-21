@@ -1,19 +1,17 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/auth"
+import { auth, currentUser } from "@clerk/nextjs/server"
 import { getSupabase } from "@/lib/supabase"
-import type { Session } from "next-auth"
 
-function adminGuard(session: Session | null) {
-  if (!session?.user?.isAdmin) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-  }
-  return null
+async function requireAdmin() {
+  const { userId } = await auth()
+  if (!userId) return null
+  const user = await currentUser()
+  return (user?.publicMetadata as { isAdmin?: boolean })?.isAdmin === true ? user : null
 }
 
 export async function GET() {
-  const session = await auth()
-  const guard = adminGuard(session)
-  if (guard) return guard
+  const admin = await requireAdmin()
+  if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
   const supabase = getSupabase()
   const { data, error } = await supabase
@@ -26,9 +24,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const session = await auth()
-  const guard = adminGuard(session)
-  if (guard) return guard
+  const admin = await requireAdmin()
+  if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
   const { discord_id, verify } = await req.json()
   if (!discord_id) return NextResponse.json({ error: "Missing discord_id" }, { status: 400 })

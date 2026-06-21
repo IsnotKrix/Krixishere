@@ -1,23 +1,20 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/auth"
+import { auth } from "@clerk/nextjs/server"
 import { getSupabase } from "@/lib/supabase"
 import { generateAuthenticationOptions } from "@simplewebauthn/server"
 
 const RP_ID = process.env.NODE_ENV === "production" ? "krixishere.org" : "localhost"
 
 export async function POST() {
-  const session = await auth()
-  if (!session?.user?.discordId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const supabase = getSupabase()
 
-  // Fetch all passkeys for this user to allow any of them
   const { data: passkeys } = await supabase
     .from("passkeys")
     .select("credential_id")
-    .eq("user_id", session.user.discordId)
+    .eq("user_id", userId)
 
   if (!passkeys?.length) {
     return NextResponse.json({ error: "No passkeys registered" }, { status: 400 })
@@ -33,9 +30,8 @@ export async function POST() {
     userVerification: "preferred",
   })
 
-  // Store challenge
   await supabase.from("passkey_challenges").upsert({
-    user_id: session.user.discordId,
+    user_id: userId,
     challenge: options.challenge,
     created_at: new Date().toISOString(),
   })

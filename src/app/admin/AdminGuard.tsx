@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useSession } from "next-auth/react"
+import { useUser } from "@clerk/nextjs"
 import { motion } from "framer-motion"
 import { ShieldOff, Loader2 } from "lucide-react"
 import { DiscordIcon } from "@/components/DiscordIcon"
@@ -9,11 +9,13 @@ import { ConsentDialog } from "@/components/ConsentDialog"
 import Link from "next/link"
 
 export function AdminGuard({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession()
+  const { isLoaded, isSignedIn, user } = useUser()
 
-  if (status === "loading") return <Fullscreen><LoadingView /></Fullscreen>
-  if (status === "unauthenticated") return <Fullscreen><UnauthenticatedView /></Fullscreen>
-  if (!session?.user?.isAdmin) return <Fullscreen><UnauthorizedView /></Fullscreen>
+  if (!isLoaded) return <Fullscreen><LoadingView /></Fullscreen>
+  if (!isSignedIn) return <Fullscreen><UnauthenticatedView /></Fullscreen>
+  if ((user?.publicMetadata as { isAdmin?: boolean })?.isAdmin !== true) {
+    return <Fullscreen><UnauthorizedView /></Fullscreen>
+  }
 
   return <>{children}</>
 }
