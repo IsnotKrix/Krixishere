@@ -4,14 +4,14 @@ import { useScreenSize } from "@/hooks/use-screen-size"
 import { PixelTrail } from "@/components/ui/pixel-trail"
 import { GooeyFilter } from "@/components/ui/gooey-filter"
 import { ExternalLink, Clock } from "lucide-react"
-import { motion } from "framer-motion"
+import { motion, type Variants } from "framer-motion"
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 24 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.7, delay: i * 0.15, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] },
+    transition: { duration: 0.7, delay: i * 0.15, ease: "easeOut" },
   }),
 }
 
