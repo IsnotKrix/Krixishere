@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { motion, type Variants } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, BookOpen, Zap, Code2, Lightbulb, Globe, Star, Wrench, Rocket, ArrowLeft } from "lucide-react"
 import type { DBPost } from "@/lib/types"
 
 const fadeUp: Variants = {
@@ -15,6 +15,8 @@ const fadeUp: Variants = {
     transition: { duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] },
   }),
 }
+
+const SECTION_ICONS = [BookOpen, Zap, Code2, Lightbulb, Globe, Star, Wrench, Rocket]
 
 function readingTime(post: DBPost): number {
   const words = post.content.reduce((acc, s) => {
@@ -31,8 +33,23 @@ function formatDate(iso: string) {
   })
 }
 
+function SectionDivider() {
+  return (
+    <div className="flex items-center gap-2.5 my-10">
+      <div className="h-px flex-1 bg-border/60" />
+      <div className="flex gap-1">
+        <div className="w-1 h-1 rounded-full bg-border" />
+        <div className="w-1 h-1 rounded-full bg-foreground/15" />
+        <div className="w-1 h-1 rounded-full bg-border" />
+      </div>
+      <div className="h-px flex-1 bg-border/60" />
+    </div>
+  )
+}
+
 export function PostPage({ post }: { post: DBPost }) {
   const [activeId, setActiveId] = useState<string>(post.content[0]?.id ?? "")
+  const [progress, setProgress] = useState(0)
   const sectionRefs = useRef<Map<string, HTMLElement>>(new Map())
   const mins = readingTime(post)
 
@@ -55,6 +72,17 @@ export function PostPage({ post }: { post: DBPost }) {
     return () => observers.forEach((o) => o.disconnect())
   }, [post.content])
 
+  useEffect(() => {
+    const onScroll = () => {
+      const el = document.documentElement
+      const scrolled = el.scrollTop
+      const total = el.scrollHeight - el.clientHeight
+      setProgress(total > 0 ? (scrolled / total) * 100 : 0)
+    }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
+
   const scrollTo = (id: string) => {
     const el = sectionRefs.current.get(id)
     if (!el) return
@@ -64,6 +92,11 @@ export function PostPage({ post }: { post: DBPost }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+
+      {/* Reading progress bar */}
+      <div className="fixed top-0 left-0 right-0 z-[60] h-[2px] bg-foreground/5">
+        <div className="h-full bg-foreground/35 transition-all duration-75" style={{ width: `${progress}%` }} />
+      </div>
 
       {/* Hero */}
       <div className="relative w-full h-[52vh] min-h-[320px] overflow-hidden">
@@ -144,7 +177,7 @@ export function PostPage({ post }: { post: DBPost }) {
 
       {/* Content area */}
       <div className="max-w-5xl mx-auto px-6 py-10">
-        <div className="md:grid md:grid-cols-[180px_1fr] md:gap-14">
+        <div className="md:grid md:grid-cols-[180px_1fr] md:gap-16">
 
           {/* TOC sidebar */}
           <aside className="hidden md:block">
@@ -153,44 +186,54 @@ export function PostPage({ post }: { post: DBPost }) {
                 Contents
               </p>
               <nav className="space-y-0.5">
-                {post.content.map(({ id, heading }) => (
-                  <button
-                    key={id}
-                    onClick={() => scrollTo(id)}
-                    className={`block w-full text-left text-[11px] font-mono py-1.5 px-2 rounded transition-all duration-200 leading-snug ${
-                      activeId === id
-                        ? "text-foreground bg-foreground/[0.06] border-l-2 border-foreground/40 pl-[7px]"
-                        : "text-foreground/25 hover:text-foreground/60 border-l-2 border-transparent pl-[7px]"
-                    }`}
-                  >
-                    {heading}
-                  </button>
-                ))}
+                {post.content.map(({ id, heading }, i) => {
+                  const Icon = SECTION_ICONS[i % SECTION_ICONS.length]
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => scrollTo(id)}
+                      className={`flex items-center gap-2 w-full text-left text-[11px] font-mono py-1.5 px-2 rounded transition-all duration-200 leading-snug ${
+                        activeId === id
+                          ? "text-foreground bg-foreground/[0.06] border-l-2 border-foreground/35 pl-[7px]"
+                          : "text-foreground/22 hover:text-foreground/55 border-l-2 border-transparent pl-[7px]"
+                      }`}
+                    >
+                      <Icon className="size-2.5 shrink-0 opacity-60" />
+                      <span className="truncate">{heading}</span>
+                    </button>
+                  )
+                })}
               </nav>
-              <div className="mt-8 pt-6 border-t border-border">
+
+              <div className="mt-8 pt-6 border-t border-border/50">
                 <Link
                   href="/blog"
-                  className="text-[10px] font-mono text-foreground/20 hover:text-foreground/50 transition-colors"
+                  className="flex items-center gap-1.5 text-[10px] font-mono text-foreground/20 hover:text-foreground/50 transition-colors"
                 >
-                  ← all posts
+                  <ArrowLeft className="size-2.5" />
+                  all posts
                 </Link>
               </div>
             </div>
           </aside>
 
           {/* Mobile TOC */}
-          <div className="md:hidden mb-8 p-4 border border-border rounded-lg">
+          <div className="md:hidden mb-8 p-4 border border-border/50 rounded-xl bg-foreground/[0.02]">
             <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-foreground/20 mb-3">Contents</p>
             <div className="space-y-1">
-              {post.content.map(({ id, heading }) => (
-                <button
-                  key={id}
-                  onClick={() => scrollTo(id)}
-                  className="block w-full text-left text-xs font-mono text-foreground/50 hover:text-foreground/80 transition-colors py-0.5"
-                >
-                  {heading}
-                </button>
-              ))}
+              {post.content.map(({ id, heading }, i) => {
+                const Icon = SECTION_ICONS[i % SECTION_ICONS.length]
+                return (
+                  <button
+                    key={id}
+                    onClick={() => scrollTo(id)}
+                    className="flex items-center gap-2 w-full text-left text-xs font-mono text-foreground/45 hover:text-foreground/75 transition-colors py-0.5"
+                  >
+                    <Icon className="size-3 shrink-0 opacity-50" />
+                    {heading}
+                  </button>
+                )
+              })}
             </div>
           </div>
 
@@ -201,52 +244,62 @@ export function PostPage({ post }: { post: DBPost }) {
               initial="hidden"
               animate="visible"
               variants={fadeUp}
-              className="text-base text-muted-foreground leading-relaxed mb-10 border-l-2 border-border pl-4 italic"
+              className="text-base text-muted-foreground leading-relaxed mb-10 border-l-2 border-border/60 pl-4 italic"
             >
               {post.excerpt}
             </motion.p>
 
-            <div className="space-y-12">
-              {post.content.map((section, i) => (
-                <motion.section
-                  key={section.id}
-                  id={section.id}
-                  ref={(el) => {
-                    if (el) sectionRefs.current.set(section.id, el)
-                    else sectionRefs.current.delete(section.id)
-                  }}
-                  custom={i + 1}
-                  initial="hidden"
-                  animate="visible"
-                  variants={fadeUp}
-                  className="scroll-mt-24"
-                >
-                  <h2 className="text-xl font-bold text-foreground mb-4 tracking-tight">
-                    {section.heading}
-                  </h2>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {section.body}
-                  </p>
-                  {section.items && section.items.length > 0 && (
-                    <ul className="mt-4 space-y-2">
-                      {section.items.map((item, j) => (
-                        <li key={j} className="flex gap-3 text-sm text-muted-foreground leading-relaxed">
-                          <span className="text-foreground/20 shrink-0 font-mono mt-0.5">—</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </motion.section>
-              ))}
+            <div>
+              {post.content.map((section, i) => {
+                const Icon = SECTION_ICONS[i % SECTION_ICONS.length]
+                return (
+                  <div key={section.id}>
+                    {i > 0 && <SectionDivider />}
+                    <motion.section
+                      id={section.id}
+                      ref={(el) => {
+                        if (el) sectionRefs.current.set(section.id, el)
+                        else sectionRefs.current.delete(section.id)
+                      }}
+                      custom={i + 1}
+                      initial="hidden"
+                      animate="visible"
+                      variants={fadeUp}
+                      className="scroll-mt-24"
+                    >
+                      <div className="flex items-center gap-2.5 mb-4">
+                        <div className="flex items-center justify-center w-6 h-6 rounded-md bg-foreground/[0.06] border border-border/50 shrink-0">
+                          <Icon className="size-3 text-foreground/50" />
+                        </div>
+                        <h2 className="text-lg font-bold text-foreground tracking-tight">
+                          {section.heading}
+                        </h2>
+                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {section.body}
+                      </p>
+                      {section.items && section.items.length > 0 && (
+                        <ul className="mt-4 space-y-2.5">
+                          {section.items.map((item, j) => (
+                            <li key={j} className="flex gap-3 text-sm text-muted-foreground leading-relaxed">
+                              <span className="text-foreground/20 shrink-0 font-mono mt-0.5 select-none">—</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </motion.section>
+                  </div>
+                )
+              })}
             </div>
 
-            <div className="mt-16 pt-8 border-t border-border flex items-center justify-between gap-4">
+            <div className="mt-14 pt-8 border-t border-border/50 flex items-center justify-between gap-4">
               <div className="flex flex-wrap gap-1.5">
                 {post.tags.map((t) => (
                   <span
                     key={t}
-                    className="text-[10px] font-mono text-muted-foreground bg-foreground/[0.04] border border-border px-2 py-0.5 rounded"
+                    className="text-[10px] font-mono text-muted-foreground bg-foreground/[0.04] border border-border/50 px-2 py-0.5 rounded"
                   >
                     {t}
                   </span>
@@ -254,9 +307,10 @@ export function PostPage({ post }: { post: DBPost }) {
               </div>
               <Link
                 href="/blog"
-                className="text-xs font-mono text-foreground/30 hover:text-foreground/60 transition-colors shrink-0"
+                className="flex items-center gap-1.5 text-xs font-mono text-foreground/25 hover:text-foreground/55 transition-colors shrink-0"
               >
-                ← back to blog
+                <ArrowLeft className="size-3" />
+                back to blog
               </Link>
             </div>
           </article>
@@ -264,9 +318,9 @@ export function PostPage({ post }: { post: DBPost }) {
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-12 flex items-center gap-4">
-        <div className="h-px flex-1 bg-border" />
+        <div className="h-px flex-1 bg-border/40" />
         <span className="text-[9px] font-mono text-foreground/15 uppercase tracking-[0.3em]">end</span>
-        <div className="h-px flex-1 bg-border" />
+        <div className="h-px flex-1 bg-border/40" />
       </div>
     </div>
   )

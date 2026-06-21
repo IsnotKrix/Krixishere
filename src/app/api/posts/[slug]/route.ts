@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { auth } from "@/auth"
 import { getSupabase } from "@/lib/supabase"
 import { staticPosts } from "@/data/posts"
 import type { DBPost } from "@/lib/types"
@@ -32,4 +33,35 @@ export async function GET(
     if (!fallback) return NextResponse.json({ error: "Not found" }, { status: 404 })
     return NextResponse.json(fallback)
   }
+}
+
+export async function PUT(
+  req: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const session = await auth()
+  if (!session?.user?.isAdmin) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+  const { slug } = await params
+  const body = await req.json()
+  const supabase = getSupabase()
+  const { error } = await supabase.from("posts").update(body).eq("slug", slug)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ ok: true })
+}
+
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const session = await auth()
+  if (!session?.user?.isAdmin) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+  const { slug } = await params
+  const supabase = getSupabase()
+  const { error } = await supabase.from("posts").delete().eq("slug", slug)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ ok: true })
 }
