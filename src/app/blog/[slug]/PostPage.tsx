@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { motion, type Variants } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
-import { ChevronRight, ArrowLeft } from "lucide-react"
+import { ChevronRight, ArrowLeft, ImageOff } from "lucide-react"
 import type { DBPost } from "@/lib/types"
 
 const fadeUp: Variants = {
@@ -115,7 +115,9 @@ export function PostPage({ post }: { post: DBPost }) {
         {post.image ? (
           <Image src={post.image} alt={post.title} fill priority className="object-cover" sizes="100vw" />
         ) : (
-          <div className="absolute inset-0 bg-foreground/[0.04]" />
+          <div className="absolute inset-0 bg-foreground/[0.06] flex items-center justify-center">
+            <ImageOff className="size-12 text-foreground/15" />
+          </div>
         )}
         <div className="absolute inset-0 bg-black/65" />
         <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background to-transparent" />
@@ -197,7 +199,6 @@ export function PostPage({ post }: { post: DBPost }) {
 
                 {post.content.map(({ id, heading }, i) => {
                   const isActive = activeId === id
-                  const isPast = i < activeIdx
                   return (
                     <button
                       key={id}
@@ -205,13 +206,6 @@ export function PostPage({ post }: { post: DBPost }) {
                       onClick={() => scrollTo(id)}
                       className="relative block w-full text-left py-1.5 group"
                     >
-                      <div className={`absolute left-[-5px] top-1/2 -translate-y-1/2 rounded-full transition-all duration-200 ${
-                        isActive
-                          ? "w-[7px] h-[7px] bg-foreground/70 shadow-[0_0_0_2px_rgba(255,255,255,0.08)]"
-                          : isPast
-                          ? "w-[5px] h-[5px] bg-foreground/35"
-                          : "w-[5px] h-[5px] bg-border/60"
-                      }`} />
                       <span className={`text-[11px] font-mono leading-snug transition-all duration-200 ${
                         isActive
                           ? "text-foreground font-medium"
@@ -247,9 +241,6 @@ export function PostPage({ post }: { post: DBPost }) {
                   onClick={() => scrollTo(id)}
                   className="relative block w-full text-left py-1 group"
                 >
-                  <div className={`absolute left-[-5px] top-1/2 -translate-y-1/2 rounded-full w-[5px] h-[5px] transition-colors ${
-                    activeId === id ? "bg-foreground/60" : "bg-border/50"
-                  }`} />
                   <span className={`text-xs font-mono transition-colors ${activeId === id ? "text-foreground" : "text-foreground/40 group-hover:text-foreground/70"}`}>
                     {heading}
                   </span>

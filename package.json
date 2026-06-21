@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",
-    "@vercel/analytics": "^2.0.1",
     "@base-ui/react": "^1.5.0",
     "@paper-design/shaders-react": "^0.0.76",
     "@radix-ui/react-dialog": "^1.1.16",
@@ -23,6 +22,7 @@
     "@simplewebauthn/browser": "^13.3.0",
     "@simplewebauthn/server": "^13.3.1",
     "@supabase/supabase-js": "^2.108.1",
+    "@vercel/analytics": "^2.0.1",
     "@tabler/icons-react": "^3.44.0",
     "@types/uuid": "^10.0.0",
     "class-variance-authority": "^0.7.1",
@@ -44,6 +44,9 @@
     "svg-path-commander": "^2.2.1",
     "tailwind-merge": "^3.6.0",
     "uuid": "^14.0.1"
+  },
+  "overrides": {
+    "postcss": "^8.5.10"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

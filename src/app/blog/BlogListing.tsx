@@ -3,7 +3,7 @@
 import { motion, type Variants } from "framer-motion"
 import Link from "next/link"
 import Image from "next/image"
-import { FileText } from "lucide-react"
+import { FileText, ImageOff } from "lucide-react"
 import type { DBPost } from "@/lib/types"
 
 const slideUp: Variants = {
@@ -46,7 +46,9 @@ function HeroPost({ post }: { post: DBPost }) {
               sizes="100vw"
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-foreground/8 to-foreground/[0.02]" />
+            <div className="absolute inset-0 bg-foreground/[0.06] flex items-center justify-center">
+              <ImageOff className="size-10 text-foreground/15" />
+            </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/45 to-transparent" />
 
@@ -94,7 +96,9 @@ function PostCard({ post, index }: { post: DBPost; index: number }) {
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-foreground/8 to-foreground/[0.02]" />
+            <div className="absolute inset-0 bg-foreground/[0.06] flex items-center justify-center">
+              <ImageOff className="size-8 text-foreground/15" />
+            </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-3.5">
@@ -124,7 +128,6 @@ function PostCard({ post, index }: { post: DBPost; index: number }) {
 const HERO_IMAGE = "https://www.iclarified.com/images/news/94502/451898/451898.jpg"
 
 export function BlogListing({ posts }: { posts: DBPost[] }) {
-  const isFromDB = posts.some((p) => !p.id.startsWith("static-") && p.view_count === 0)
   const hasNoPosts = posts.length === 0
 
   const sorted = [...posts].sort(
