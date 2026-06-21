@@ -2,7 +2,7 @@ import { RepoButtonClient } from "@/components/RepoButtonClient"
 
 async function getStars(): Promise<number | null> {
   try {
-    const res = await fetch("https://api.github.com/repos/isnotkrix/krixishere.org", {
+    const res = await fetch("https://api.github.com/repos/isnotkrix/krixishere", {
       next: { revalidate: 3600 },
       headers: { Accept: "application/vnd.github+json" },
     })
