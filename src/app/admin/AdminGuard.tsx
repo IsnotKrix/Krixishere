@@ -1,9 +1,12 @@
 "use client"
 
+import { useState } from "react"
 import { useSession } from "next-auth/react"
-import { Loader2, ShieldOff } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { motion } from "framer-motion"
+import { ShieldOff, Loader2 } from "lucide-react"
 import { DiscordIcon } from "@/components/DiscordIcon"
+import { ConsentDialog } from "@/components/ConsentDialog"
+import Link from "next/link"
 
 export function AdminGuard({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession()
@@ -17,7 +20,7 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
 
 function Fullscreen({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-6">
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
       {children}
     </div>
   )
@@ -25,66 +28,99 @@ function Fullscreen({ children }: { children: React.ReactNode }) {
 
 function LoadingView() {
   return (
-    <div className="flex flex-col items-center gap-4 animate-[fadeSlideIn_0.35s_ease_forwards]">
-      <Loader2 className="size-8 text-violet-400 animate-spin" />
-      <p className="text-zinc-400 text-sm font-medium tracking-wide">
-        Checking authorization…
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      className="flex flex-col items-center gap-5"
+    >
+      <div className="relative w-12 h-12 flex items-center justify-center">
+        <div className="absolute inset-0 rounded-full border border-border" />
+        <Loader2 className="size-4 text-foreground/40 animate-spin" />
+      </div>
+      <p className="text-xs font-mono text-foreground/30 uppercase tracking-[0.3em]">
+        checking auth…
       </p>
-    </div>
+    </motion.div>
   )
 }
 
 function UnauthenticatedView() {
+  const [dialogOpen, setDialogOpen] = useState(false)
+
   return (
-    <div className="flex flex-col items-center gap-6 animate-[bounceUp_0.65s_cubic-bezier(0.34,1.56,0.64,1)_forwards]">
-      <div className="size-16 rounded-2xl bg-[#5865F2]/10 border border-[#5865F2]/25 flex items-center justify-center">
-        <DiscordIcon className="size-8 text-[#5865F2]" />
-      </div>
-
-      <div className="text-center space-y-2">
-        <h2 className="text-white text-xl font-semibold">Login required</h2>
-        <p className="text-zinc-400 text-sm leading-relaxed max-w-xs">
-          Login with Discord to verify your identity
-          <br />
-          and get access to the admin panel.
-        </p>
-      </div>
-
-      <Button
-        asChild
-        className="bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-full px-6 gap-2.5 font-medium transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        className="flex flex-col items-center gap-8 text-center max-w-xs"
       >
-        <a href="/consent?callbackUrl=/admin">
-          <DiscordIcon className="size-4" />
-          Login with Discord
-        </a>
-      </Button>
-    </div>
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/25 font-mono mb-4">
+            krix. / admin
+          </p>
+          <div className="w-px h-10 bg-gradient-to-b from-transparent via-border to-transparent mx-auto mb-4" />
+          <h2 className="text-2xl font-bold tracking-tight mb-2">Login required</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Sign in with Discord to verify your identity and access the admin panel.
+          </p>
+        </div>
+
+        <div className="w-full space-y-3">
+          <button
+            onClick={() => setDialogOpen(true)}
+            className="flex items-center justify-center gap-2.5 w-full px-5 py-2.5 border border-border rounded-lg text-sm font-mono text-foreground/70 hover:text-foreground hover:border-foreground/30 hover:bg-foreground/[0.04] transition-all"
+          >
+            <DiscordIcon className="size-4 text-[#5865F2]" />
+            Login with Discord
+          </button>
+          <Link
+            href="/"
+            className="block text-xs font-mono text-foreground/25 hover:text-foreground/50 transition-colors"
+          >
+            ← back to home
+          </Link>
+        </div>
+      </motion.div>
+
+      <ConsentDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        callbackUrl="/admin"
+      />
+    </>
   )
 }
 
 function UnauthorizedView() {
   return (
-    <div className="flex flex-col items-center gap-5 animate-[fadeSlideIn_0.4s_ease_forwards]">
-      <div className="size-16 rounded-2xl bg-red-500/8 border border-red-500/20 flex items-center justify-center">
-        <ShieldOff className="size-7 text-red-400" />
-      </div>
-
-      <div className="text-center space-y-2">
-        <h2 className="text-white text-xl font-semibold">Access denied</h2>
-        <p className="text-zinc-400 text-sm leading-relaxed max-w-xs">
-          You are not authorized to access this section.
-          <br />
-          Contact the administrator.
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+      className="flex flex-col items-center gap-8 text-center max-w-xs"
+    >
+      <div>
+        <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/25 font-mono mb-4">
+          krix. / admin
+        </p>
+        <div className="w-px h-10 bg-gradient-to-b from-transparent via-border to-transparent mx-auto mb-4" />
+        <div className="flex items-center justify-center mb-3">
+          <ShieldOff className="size-5 text-foreground/20" />
+        </div>
+        <h2 className="text-2xl font-bold tracking-tight mb-2">Access denied</h2>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Your account does not have admin privileges. Contact the administrator.
         </p>
       </div>
 
-      <a
+      <Link
         href="/changelog"
-        className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors underline underline-offset-2"
+        className="text-xs font-mono text-foreground/25 hover:text-foreground/50 transition-colors"
       >
-        Back to Changelog
-      </a>
-    </div>
+        ← back to changelog
+      </Link>
+    </motion.div>
   )
 }
