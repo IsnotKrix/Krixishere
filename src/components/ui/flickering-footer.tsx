@@ -68,9 +68,49 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [isInView, setIsInView] = useState(false)
-  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 })
 
   const memoizedColor = useMemo(() => getRGBA(color), [color])
+
+  // Pre-computed text mask: true where a square overlaps text pixels
+  const textMaskRef = useRef<Uint8Array | null>(null)
+
+  const buildTextMask = useCallback(
+    (w: number, h: number, cols: number, rows: number, dpr: number) => {
+      if (!text) {
+        textMaskRef.current = null
+        return
+      }
+      const mc = document.createElement("canvas")
+      mc.width = w
+      mc.height = h
+      const mctx = mc.getContext("2d", { willReadFrequently: true })
+      if (!mctx) return
+      mctx.save()
+      mctx.scale(dpr, dpr)
+      mctx.fillStyle = "white"
+      mctx.font = `${fontWeight} ${fontSize}px "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
+      mctx.textAlign = "center"
+      mctx.textBaseline = "middle"
+      mctx.fillText(text, w / (2 * dpr), h / (2 * dpr))
+      mctx.restore()
+
+      const mask = new Uint8Array(cols * rows)
+      const sw = Math.max(1, Math.round(squareSize * dpr))
+      const sh = Math.max(1, Math.round(squareSize * dpr))
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          const x = Math.round(i * (squareSize + gridGap) * dpr)
+          const y = Math.round(j * (squareSize + gridGap) * dpr)
+          const data = mctx.getImageData(x, y, sw, sh).data
+          for (let k = 0; k < data.length; k += 4) {
+            if (data[k] > 0) { mask[i * rows + j] = 1; break }
+          }
+        }
+      }
+      textMaskRef.current = mask
+    },
+    [text, fontSize, fontWeight, squareSize, gridGap],
+  )
 
   const drawGrid = useCallback(
     (
@@ -83,29 +123,14 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
       dpr: number,
     ) => {
       ctx.clearRect(0, 0, w, h)
-      const maskCanvas = document.createElement("canvas")
-      maskCanvas.width = w
-      maskCanvas.height = h
-      const maskCtx = maskCanvas.getContext("2d", { willReadFrequently: true })
-      if (!maskCtx) return
-      if (text) {
-        maskCtx.save()
-        maskCtx.scale(dpr, dpr)
-        maskCtx.fillStyle = "white"
-        maskCtx.font = `${fontWeight} ${fontSize}px "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
-        maskCtx.textAlign = "center"
-        maskCtx.textBaseline = "middle"
-        maskCtx.fillText(text, w / (2 * dpr), h / (2 * dpr))
-        maskCtx.restore()
-      }
+      const mask = textMaskRef.current
       for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
           const x = i * (squareSize + gridGap) * dpr
           const y = j * (squareSize + gridGap) * dpr
           const sw = squareSize * dpr
           const sh = squareSize * dpr
-          const maskData = maskCtx.getImageData(x, y, sw, sh).data
-          const hasText = maskData.some((v, idx) => idx % 4 === 0 && v > 0)
+          const hasText = mask ? mask[i * rows + j] === 1 : false
           const opacity = squares[i * rows + j]
           const finalOpacity = hasText ? Math.min(1, opacity * 3 + 0.4) : opacity
           ctx.fillStyle = colorWithOpacity(memoizedColor, finalOpacity)
@@ -113,12 +138,12 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
         }
       }
     },
-    [memoizedColor, squareSize, gridGap, text, fontSize, fontWeight],
+    [memoizedColor, squareSize, gridGap],
   )
 
   const setupCanvas = useCallback(
     (canvas: HTMLCanvasElement, w: number, h: number) => {
-      const dpr = window.devicePixelRatio || 1
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
       canvas.width = w * dpr
       canvas.height = h * dpr
       canvas.style.width = `${w}px`
@@ -129,9 +154,10 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
       for (let i = 0; i < squares.length; i++) {
         squares[i] = Math.random() * maxOpacity
       }
+      buildTextMask(canvas.width, canvas.height, cols, rows, dpr)
       return { cols, rows, squares, dpr }
     },
-    [squareSize, gridGap, maxOpacity],
+    [squareSize, gridGap, maxOpacity, buildTextMask],
   )
 
   const updateSquares = useCallback(
@@ -152,13 +178,15 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
+    // Stop animation entirely for prefers-reduced-motion
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+
     let animationFrameId: number
     let gridParams: ReturnType<typeof setupCanvas>
 
     const updateCanvasSize = () => {
       const newWidth = width || container.clientWidth
       const newHeight = height || container.clientHeight
-      setCanvasSize({ width: newWidth, height: newHeight })
       gridParams = setupCanvas(canvas, newWidth, newHeight)
     }
 
@@ -193,7 +221,7 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
       <canvas
         ref={canvasRef}
         className="pointer-events-none"
-        style={{ width: canvasSize.width, height: canvasSize.height }}
+        style={{ display: "block" }}
       />
     </div>
   )
