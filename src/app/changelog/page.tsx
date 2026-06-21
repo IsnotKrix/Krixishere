@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { forbidden } from "next/navigation"
 import { Changelog } from "./Changelog"
 import { staticReleases } from "@/data/releases"
 import type { DBRelease } from "@/lib/types"
@@ -26,5 +25,6 @@ async function getReleases(): Promise<DBRelease[]> {
 }
 
 export default async function ChangelogPage() {
-  forbidden()
+  const releases = await getReleases()
+  return <Changelog releases={releases} />
 }
