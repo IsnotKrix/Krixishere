@@ -5,9 +5,7 @@ import RepoButton from "@/components/RepoButton";
 import { PortfolioNav } from "@/components/PortfolioNav";
 import { PageLoader } from "@/components/PageLoader";
 import { Providers } from "@/components/Providers";
-import { Footer } from "@/components/ui/footer";
-import { Code2 } from "lucide-react";
-import { IconBrandGithub, IconBrandX } from "@tabler/icons-react";
+import { FlickeringFooter } from "@/components/ui/flickering-footer";
 import { auth } from "@/auth";
 
 const geistSans = Geist({
@@ -21,9 +19,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Krix — Developer & Designer",
-  description: "Full-stack developer crafting fast, beautiful, and purposeful digital experiences.",
-  keywords: ["developer", "portfolio", "full-stack", "web development"],
+  title: "Krix — Roblox Developer",
+  description: "Roblox developer and web builder. Projects, experiments, and everything I'm working on.",
+  keywords: ["roblox", "developer", "portfolio", "web development", "game dev"],
 };
 
 export default async function RootLayout({
@@ -43,27 +41,8 @@ export default async function RootLayout({
           <PageLoader />
           <RepoButton />
           {children}
-          <Footer
-            logo={<Code2 className="size-6 text-violet-400" />}
-            brandName="Krix"
-            socialLinks={[
-              { icon: <IconBrandGithub className="size-4" />, href: "https://github.com", label: "GitHub" },
-              { icon: <IconBrandX className="size-4" />, href: "https://x.com", label: "X (Twitter)" },
-            ]}
-            mainLinks={[
-              { href: "/", label: "Home" },
-              { href: "/changelog", label: "Changelog" },
-            ]}
-            legalLinks={[
-              { href: "/privacy", label: "Privacy Policy" },
-              { href: "/terms", label: "Terms of Service" },
-            ]}
-            copyright={{
-              text: `© ${new Date().getFullYear()} Krix`,
-              license: "All rights reserved",
-            }}
-          />
-          <PortfolioNav />
+          <FlickeringFooter />
+          {/* <PortfolioNav /> */}
         </Providers>
       </body>
     </html>
