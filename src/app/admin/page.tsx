@@ -24,7 +24,7 @@ type AdminUser = {
 
 type Tab = "releases" | "posts" | "users"
 
-const NAV: { id: Tab; label: string; icon: React.ElementType }[] = [
+const NAV: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "releases", label: "Releases", icon: Layers },
   { id: "posts", label: "Posts", icon: FileText },
   { id: "users", label: "Users", icon: Users },
@@ -435,7 +435,7 @@ function Skeleton({ rows }: { rows: number }) {
   )
 }
 
-function Empty({ icon: Icon, message }: { icon: React.ElementType; message: string }) {
+function Empty({ icon: Icon, message }: { icon: React.ComponentType<{ className?: string }>; message: string }) {
   return (
     <div className="flex flex-col items-center gap-3 py-20 text-center">
       <Icon className="size-8 text-foreground/15" />
