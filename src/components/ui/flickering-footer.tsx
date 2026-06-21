@@ -6,6 +6,8 @@ import * as Color from "color-bits"
 import Link from "next/link"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { twMerge } from "tailwind-merge"
+import { PixelTrail } from "@/components/ui/pixel-trail"
+import { GooeyFilter } from "@/components/ui/gooey-filter"
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -290,6 +292,15 @@ export function FlickeringFooter() {
             color="#6B7280"
             maxOpacity={0.25}
             flickerChance={0.1}
+          />
+        </div>
+        <GooeyFilter id="gooey-filter-footer" strength={6} />
+        <div className="absolute inset-0 z-20" style={{ filter: "url(#gooey-filter-footer)" }}>
+          <PixelTrail
+            pixelSize={tablet ? 16 : 20}
+            fadeDuration={500}
+            delay={0}
+            pixelClassName="bg-white/20 rounded-full"
           />
         </div>
       </div>
