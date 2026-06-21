@@ -44,8 +44,8 @@ export default async function RootLayout({
           {children}
           <FlickeringFooter />
           {/* <PortfolioNav /> */}
+          <Analytics />
         </Providers>
-        <Analytics />
       </body>
     </html>
   );
