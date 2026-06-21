@@ -73,10 +73,10 @@ export function FlickeringFooter() {
     <footer className="relative w-full h-24 overflow-hidden border-t border-white/[0.04]">
       <FlickeringGrid />
       <div className="relative z-10 h-full flex items-center justify-between px-8">
-        <span className="text-[10px] font-mono text-zinc-800 tracking-[0.25em] uppercase select-none">
-          krix<span className="text-zinc-700">.</span>
+        <span className="text-[10px] font-mono text-zinc-500 tracking-[0.25em] uppercase select-none">
+          krix<span className="text-zinc-600">.</span>
         </span>
-        <span className="text-[10px] font-mono text-zinc-800 tracking-[0.2em] select-none">
+        <span className="text-[10px] font-mono text-zinc-500 tracking-[0.2em] select-none">
           © {year}
         </span>
       </div>
