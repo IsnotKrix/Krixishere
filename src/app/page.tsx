@@ -5,6 +5,7 @@ import { PixelTrail } from "@/components/ui/pixel-trail"
 import { GooeyFilter } from "@/components/ui/gooey-filter"
 import { ExternalLink, Clock } from "lucide-react"
 import { motion, type Variants } from "framer-motion"
+import Image from "next/image"
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 24 },
@@ -23,10 +24,13 @@ export default function Home() {
 
       {/* Hero */}
       <section className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden">
-        <img
+        <Image
           src="https://www.iclarified.com/images/news/94502/451898/451898.jpg"
-          alt="Background"
-          className="w-full h-full object-cover absolute inset-0"
+          alt=""
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
         />
         <div className="absolute inset-0 bg-black/55" />
 
@@ -87,7 +91,7 @@ export default function Home() {
       </section>
 
       {/* About */}
-      <section className="py-32 px-6 max-w-4xl mx-auto">
+      <section id="about" className="py-32 px-6 max-w-4xl mx-auto scroll-mt-14">
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <div>
             <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4 font-mono">About</p>
@@ -118,7 +122,7 @@ export default function Home() {
       </section>
 
       {/* Projects */}
-      <section className="py-24 px-6 max-w-4xl mx-auto">
+      <section id="projects" className="py-24 px-6 max-w-4xl mx-auto scroll-mt-14">
         <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4 font-mono">Projects</p>
         <h2 className="text-4xl font-bold mb-12">What I&apos;ve built</h2>
 
