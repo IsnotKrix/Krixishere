@@ -1,8 +1,5 @@
 "use client"
 
-import { useScreenSize } from "@/hooks/use-screen-size"
-import { PixelTrail } from "@/components/ui/pixel-trail"
-import { GooeyFilter } from "@/components/ui/gooey-filter"
 import { ExternalLink, Clock } from "lucide-react"
 import { motion, type Variants } from "framer-motion"
 import Image from "next/image"
@@ -17,8 +14,6 @@ const fadeUp: Variants = {
 }
 
 export default function Home() {
-  const screenSize = useScreenSize()
-
   return (
     <div className="min-h-screen bg-background text-foreground">
 
@@ -33,19 +28,6 @@ export default function Home() {
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-black/55" />
-
-        <GooeyFilter id="gooey-filter-hero" strength={8} />
-        <div
-          className="absolute inset-0 z-0"
-          style={{ filter: "url(#gooey-filter-hero)" }}
-        >
-          <PixelTrail
-            pixelSize={screenSize.lessThan("md") ? 16 : 28}
-            fadeDuration={600}
-            delay={0}
-            pixelClassName="bg-white/40 rounded-full"
-          />
-        </div>
 
         <div className="relative z-10 text-center px-5 max-w-3xl mx-auto">
           <motion.p
