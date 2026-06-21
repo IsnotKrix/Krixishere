@@ -18,7 +18,7 @@ export function RepoButtonClient({ stars }: RepoButtonClientProps) {
 
   return (
     <a
-      href="https://github.com/isnotkrix/krixishere.org"
+      href="https://github.com/isnotkrix/krixishere"
       target="_blank"
       rel="noopener noreferrer"
       className="fixed top-4 right-4 z-[60] flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-black/70 backdrop-blur-md text-xs text-zinc-400 hover:text-white hover:border-white/25 transition-colors duration-200 overflow-hidden"
