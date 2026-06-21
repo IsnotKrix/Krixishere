@@ -7,6 +7,7 @@ import { PageLoader } from "@/components/PageLoader";
 import { Providers } from "@/components/Providers";
 import { FlickeringFooter } from "@/components/ui/flickering-footer";
 import { auth } from "@/auth";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,6 +45,7 @@ export default async function RootLayout({
           <FlickeringFooter />
           {/* <PortfolioNav /> */}
         </Providers>
+        <Analytics />
       </body>
     </html>
   );
