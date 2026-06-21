@@ -4,7 +4,7 @@ import "./agent-ui.css";
 
 export type TextShimmerProps = {
   children: React.ReactNode;
-  as?: React.ElementType;
+  as?: React.ElementType<{ className?: string; style?: React.CSSProperties; children?: React.ReactNode }>;
   className?: string;
   duration?: number;
   spread?: number;
