@@ -6,7 +6,7 @@ import {
   Plus, Pencil, Trash2, PackageOpen, Users, BadgeCheck,
   FileText, LogOut, Layers, Settings2,
 } from "lucide-react"
-import { signOut } from "next-auth/react"
+import { useClerk } from "@clerk/nextjs"
 import { ReleaseFormDialog } from "@/components/ReleaseFormDialog"
 import { PostFormDialog } from "@/components/PostFormDialog"
 import { ContextCard } from "@/components/ui/context-card"
@@ -39,6 +39,7 @@ const rowIn: Variants = {
 }
 
 export default function AdminPage() {
+  const { signOut } = useClerk()
   const [tab, setTab] = useState<Tab>("releases")
 
   const [releases, setReleases] = useState<DBRelease[]>([])
@@ -172,7 +173,7 @@ export default function AdminPage() {
 
         <div className="p-3 border-t border-border">
           <button
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={() => signOut({ redirectUrl: "/" })}
             className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-mono text-foreground/30 hover:text-red-400 hover:bg-red-400/[0.07] transition-all w-full"
           >
             <LogOut className="size-3.5 shrink-0" />
@@ -196,7 +197,7 @@ export default function AdminPage() {
           </button>
         ))}
         <button
-          onClick={() => signOut({ callbackUrl: "/" })}
+          onClick={() => signOut({ redirectUrl: "/" })}
           className="flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-mono text-foreground/25 hover:text-red-400 transition-colors"
         >
           <LogOut className="size-4" />
