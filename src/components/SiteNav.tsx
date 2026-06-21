@@ -8,6 +8,7 @@ import { GithubIcon } from "@/components/icons"
 const navLinks = [
   { label: "About", href: "/#about" },
   { label: "Projects", href: "/#projects" },
+  { label: "Changelog", href: "/changelog" },
 ]
 
 export function SiteNav() {

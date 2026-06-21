@@ -2,7 +2,10 @@
 
 import { useRef } from "react"
 import { motion, useInView } from "framer-motion"
+import Image from "next/image"
 import type { DBRelease } from "@/lib/types"
+
+const HERO_IMAGE = "https://www.iclarified.com/images/news/94502/451898/451898.jpg"
 
 function ReleaseEntry({ item, index }: { item: DBRelease; index: number }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -89,26 +92,42 @@ export function Changelog({ releases }: Props) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Hero */}
-      <section className="pt-36 pb-16 px-6 max-w-4xl mx-auto">
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-xs uppercase tracking-[0.35em] text-muted-foreground mb-5 font-mono"
-        >
-          Changelog
-        </motion.p>
+      {/* Hero image banner */}
+      <div className="relative w-full h-[45vh] min-h-[280px] overflow-hidden">
+        <Image
+          src={HERO_IMAGE}
+          alt=""
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background to-transparent" />
 
-        <motion.h1
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
-          className="text-5xl md:text-7xl font-bold text-foreground mb-5 leading-none tracking-tight"
-        >
-          What&apos;s new
-        </motion.h1>
+        {/* Overlay text */}
+        <div className="absolute inset-0 flex flex-col justify-end max-w-4xl mx-auto px-6 pb-12">
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-xs uppercase tracking-[0.35em] text-white/40 mb-3 font-mono"
+          >
+            Changelog
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            className="text-5xl md:text-7xl font-bold text-white leading-none tracking-tight"
+          >
+            What&apos;s new
+          </motion.h1>
+        </div>
+      </div>
 
+      {/* Sub-hero */}
+      <section className="pt-10 pb-12 px-6 max-w-4xl mx-auto">
         <motion.p
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -121,8 +140,8 @@ export function Changelog({ releases }: Props) {
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.42 }}
-          className="flex items-center gap-3 mt-8"
+          transition={{ duration: 0.5, delay: 0.38 }}
+          className="flex items-center gap-3 mt-5"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-foreground/[0.04] border border-border rounded-full">
             <div className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
